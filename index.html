@@ -150,7 +150,9 @@
             .layout-2col .problem-item.spacious { padding-bottom: 1.1rem; }
             .problem-item.visual-problem { padding-bottom: 0.4rem; margin-bottom: 0.4rem; }
             .problem-visual-row { height: 105px; }
-            .header-title h1 { line-height: 1.3; font-size: 3.2rem !important; }
+            /* 修正: タイトル枠の調整 */
+            .header-title h1 { line-height: 1.2; font-size: 2.4rem !important; margin-bottom: 5px; } 
+            .header-box { display: block !important; height: auto !important; } /* Flex解除して自然な高さに */
             .mark-correct { display: none !important; }
             .correction-text { display: none !important; }
         }
