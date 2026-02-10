@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>倍の見方・割合マスター Ver.3.1</title>
+    <title>倍の見方・割合マスター Ver.3.3</title>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -143,7 +143,7 @@
 
         @media print {
             body { background: none; display: block; padding: 0; margin: 0; }
-            #home-screen, .controls, #result-modal, #confetti-canvas { display: none !important; }
+            .screen, .controls, #result-modal, #confetti-canvas { display: none !important; }
             .sheet { width: 210mm; height: 296mm; page-break-after: always; padding: 10mm 15mm; margin: 0; box-shadow: none; border: none; }
             #print-area { display: block !important; }
             .drawing-canvas, .btn-clear { display: none !important; }
@@ -160,7 +160,7 @@
 
     <!-- Home Screen -->
     <div id="home-screen" class="screen active">
-        <h1 class="text-4xl md:text-5xl font-black text-indigo-600 mb-2 tracking-tight">倍の見方・割合マスター Ver.3.1</h1>
+        <h1 class="text-4xl md:text-5xl font-black text-indigo-600 mb-2 tracking-tight">倍の見方・割合マスター Ver.3.3</h1>
         <p class="text-gray-500 font-bold mb-8 text-center px-4">わかる、解ける、自信がつく！「割合」の世界を完ぺきに攻略しよう！</p>
         
         <!-- 各ボタンに data-grade と data-mode を付与 -->
@@ -207,7 +207,10 @@
             </div>
         </div>
         <div class="mt-8 text-center">
-            <button onclick="window.app.resetProgress()" class="text-sm text-gray-400 hover:text-rose-500 underline">学習記録をリセットする</button>
+            <button onclick="window.app.resetProgress()" class="text-sm text-gray-400 hover:text-rose-500 underline mb-4">学習記録をリセットする</button>
+            <div class="text-gray-400 text-sm font-bold">
+                &copy;2026 倍の見方・割合マスター ＩＣＴ支援の杜
+            </div>
         </div>
     </div>
 
@@ -819,6 +822,7 @@
                         let val1 = a * m; 
                         let val2 = b * m;
                         
+                        // justify-center -> justify-start
                         pool.push({ 
                             html: `<div class="flex items-center text-xl justify-start w-full text-left ml-4"><span class="math-text text-2xl">${val1} : ${val2}</span><span class="mx-4">→</span><div class="inline-flex flex-col items-center"><div class="input-wrapper"><input type="text" class="box" style="width:3.2rem;height:1.8rem" data-ans="${a}"><div class="mark-correct"></div></div><div class="w-full border-t-2 border-gray-800 my-1"></div><div class="input-wrapper"><input type="text" class="box" style="width:3.2rem;height:1.8rem" data-ans="${b}"><div class="mark-correct"></div></div></div></div>` 
                         });
