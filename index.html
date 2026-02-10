@@ -752,6 +752,48 @@
                 return pool.sort(() => Math.random() - 0.5);
             }
 
+            get5thGradePool(type) {
+                let pool = [];
+                const ratioList = [0.2, 0.4, 0.5, 0.6, 0.8, 1.2, 1.4, 1.5];
+
+                const scenarios = [
+                    { id: 'b', t1: (b,c)=>`バスケットボールのシュートを <span class="math-text">${b}</span>本打って, <span class="math-text">${c}</span>本入りました。割合を求めましょう。`, t2: (b,r)=>`シュートを <span class="math-text">${b}</span>本打ちました。入った数はその <span class="math-text">${r}</span>倍です。何本入りましたか。`, t3: (c,r)=>`シュートが <span class="math-text">${c}</span>本入りました。打った数の <span class="math-text">${r}</span>倍です。何本打ちましたか。`, ul: "本", bl: "打った数", cl: "入った数", gen: (r) => { 
+                        let b = [10, 20, 30, 40, 50][this.getRandomInt(0, 4)]; 
+                        return {b, r, c:Math.round(b*r)}; 
+                    }, lessThanOne: true },
+                    { id: 'e', t1: (b,c)=>`定員 <span class="math-text">${b}</span>人のイベントに <span class="math-text">${c}</span>人の申し込みがありました。定員をもとにした申し込み人数の割合を求めましょう。`, t2: (b,r)=>`定員 <span class="math-text">${b}</span>人のイベントに、定員の <span class="math-text">${r}</span>倍の申し込みがありました。何人申し込みましたか。`, t3: (c,r)=>`イベントに <span class="math-text">${c}</span>人の申し込みがありました。これは定員の <span class="math-text">${r}</span>倍です。定員は何人ですか。`, ul: "人", bl: "定員", cl: "申し込み", gen: (r) => { let b = [50, 100, 200, 400][this.getRandomInt(0, 3)]; return {b, r, c:Math.round(b*r)}; } },
+                    { id: 'h', t1: (b,c)=>`弟の身長は <span class="math-text">${b}</span>cm, 兄の身長は <span class="math-text">${c}</span>cmです。弟の身長をもとにした兄の身長の割合を求めましょう。`, t2: (b,r)=>`弟の身長は <span class="math-text">${b}</span>cmです。兄の身長は弟の <span class="math-text">${r}</span>倍です。兄は何cmですか。`, t3: (c,r)=>`兄の身長は <span class="math-text">${c}</span>cmです。これは弟の身長の <span class="math-text">${r}</span>倍です。弟は何cmですか。`, ul: "cm", bl: "弟", cl: "兄", gen: (r) => { 
+                        let safeR = (r <= 1.0) ? 1.2 : r;
+                        let b = [130, 140, 150, 160][this.getRandomInt(0, 3)]; 
+                        return {b, r:safeR, c:Math.round(b*safeR)}; 
+                    } },
+                    { id: 'p', t1: (b,c)=>`A市の人口は <span class="math-text">${b}</span>人, B市の人口は <span class="math-text">${c}</span>人です。A市の人口をもとにしたB市の人口の割合を求めましょう。`, t2: (b,r)=>`A市の人口は <span class="math-text">${b}</span>人です。B市の人口はA市の <span class="math-text">${r}</span>倍です。B市は何人ですか。`, t3: (c,r)=>`B市の人口は <span class="math-text">${c}</span>人です。これはA市の人口の <span class="math-text">${r}</span>倍です。A市は何人ですか。`, ul: "人", bl: "A市", cl: "B市", gen: (r) => { let b = [20000, 40000, 50000][this.getRandomInt(0, 2)]; return {b, r, c:Math.round(b*r)}; } },
+                    { id: 'w', t1: (b,c)=>`水そうに <span class="math-text">${b}</span>Lの水が入ります。今は <span class="math-text">${c}</span>L入っています。全体の量に対する割合を求めましょう。`, t2: (b,r)=>`水そうに <span class="math-text">${b}</span>Lの水が入ります。今は全体の <span class="math-text">${r}</span>倍入っています。何Lですか。`, t3: (c,r)=>`水そうに <span class="math-text">${c}</span>Lの水が入っています。これは全体の <span class="math-text">${r}</span>倍です。全体は何L入りますか。`, ul: "L", bl: "全体", cl: "今", gen: (r) => { let b = [20, 40, 50, 100][this.getRandomInt(0, 3)]; return {b, r, c:Math.round(b*r)}; }, lessThanOne: true }
+                ];
+
+                scenarios.forEach(sc => {
+                    ratioList.forEach(r => {
+                        if (sc.lessThanOne && r >= 1.0) return;
+                        if (sc.id === 'h' && r <= 1.0) return;
+                        // 修正：身長の場合、倍率が1.25を超えると大きすぎるので除外 (例: 160*1.4=224cm)
+                        if (sc.id === 'h' && r > 1.25) return; 
+
+                        const v = sc.gen(r);
+                        if (type === "ratio_p1") pool.push({ text: sc.t1(v.b, v.c), answer: v.r, ul: "倍", base: v.b, compare: v.c, ratio: v.r, a: v.r, bl: sc.bl, cl: sc.cl, hideRatio: true, scenarioId: sc.id });
+                        else if (type === "ratio_p2") pool.push({ text: sc.t2(v.b, v.r), answer: v.c, ul: sc.ul, base: v.b, compare: v.c, ratio: v.r, a: v.c, bl: sc.bl, cl: sc.cl, hideComp: true, scenarioId: sc.id });
+                        else if (type === "ratio_p3") pool.push({ text: sc.t3(v.c, v.r), answer: v.b, ul: sc.ul, base: v.b, compare: v.c, ratio: v.r, a: v.b, bl: sc.bl, cl: sc.cl, hideBase: true, scenarioId: sc.id });
+                    });
+                });
+
+                if (["ratio_p4", "ratio_p5"].includes(type)) {
+                    // ... (This part was for p4/p5 which are separate now)
+                    // Wait, get5thGradePool in previous version handled p4/p5 logic inside?
+                    // No, generateProblems calls get5thGradePercentPool for ratio_p4 and DiscountPool for ratio_p5.
+                    // So get5thGradePool only needs to handle ratio_p1, p2, p3.
+                }
+                return pool;
+            }
+
             get6thGradeRatioValuePool() {
                 let pool = [];
                 const gcd = (x, y) => !y ? x : gcd(y, x % y);
