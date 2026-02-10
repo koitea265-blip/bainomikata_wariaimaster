@@ -1,0 +1,1333 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>倍の見方・割合マスター Ver.3.1</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=BIZ+UDGothic:wght@400;700&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        /* --- Base Styles --- */
+        body {
+            font-family: 'Zen Maru Gothic', 'BIZ UDGothic', sans-serif;
+            background-color: #f0f9ff;
+            color: #1f2937;
+            display: flex; flex-direction: column; align-items: center;
+            min-height: 100vh; margin: 0; padding: 0;
+            user-select: none; -webkit-print-color-adjust: exact;
+        }
+        input { user-select: text; }
+        .screen { display: none; width: 100%; justify-content: center; }
+        .screen.active { display: flex; }
+
+        /* --- Home Screen --- */
+        #home-screen { flex-direction: column; align-items: center; width: 100%; max-width: 1280px; padding: 2rem 1rem; }
+        .grade-columns { display: flex; flex-wrap: wrap; gap: 1.5rem; justify-content: center; width: 100%; margin-top: 1rem; }
+        .grade-column {
+            flex: 1 1 200px; max-width: 240px; background: white; border-radius: 1.5rem; padding: 1.5rem 1rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); border-top: 8px solid; display: flex; flex-direction: column; gap: 0.8rem;
+        }
+        .gc-2 { border-color: #fca5a5; } .gc-3 { border-color: #fdba74; }
+        .gc-4 { border-color: #fde047; } .gc-5 { border-color: #86efac; } .gc-6 { border-color: #93c5fd; }
+        .grade-header { text-align: center; font-size: 1.4rem; font-weight: 900; margin-bottom: 0.5rem; color: #374151; border-bottom: 2px dashed #f3f4f6; padding-bottom: 0.5rem; }
+
+        .unit-btn {
+            width: 100%; text-align: left; padding: 0.75rem 1rem; border-radius: 0.75rem;
+            background: #f9fafb; border: 2px solid #e5e7eb; font-weight: bold; font-size: 0.95rem;
+            color: #4b5563; transition: all 0.2s; cursor: pointer;
+            display: flex; justify-content: space-between; align-items: center; line-height: 1.3;
+            position: relative; overflow: hidden;
+        }
+        .unit-btn:hover { background: #eff6ff; border-color: #60a5fa; color: #2563eb; transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+        
+        /* バッジ（達成度）のスタイル */
+        .badge { font-size: 1.2rem; margin-left: 0.5rem; filter: drop-shadow(0 1px 1px rgba(0,0,0,0.1)); }
+        .badge.gold { color: #f59e0b; } /* ★ */
+        .badge.perfect { color: #e11d48; } /* 👑 */
+
+        /* --- Drill Screen --- */
+        #drill-screen { flex-direction: column; align-items: center; padding-bottom: 2rem; }
+        .sheet {
+            background: white; width: 210mm; min-height: 297mm; margin: 20px auto; padding: 10mm 15mm; 
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); position: relative; box-sizing: border-box;
+            display: flex; flex-direction: column; overflow: hidden;
+        }
+        .header-row { display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: stretch; min-height: 120px; width: 100%; }
+        .header-box { border: 3px solid #374151; border-radius: 10px; padding: 0.8rem 1.2rem; background-color: #fff; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .score-container { border: 3px solid #374151; border-radius: 10px; background-color: #fff; width: 180px; display: flex; flex-direction: column; justify-content: space-between; padding: 0.8rem 1.2rem; flex-shrink: 0; }
+        .header-title h1 { white-space: nowrap; font-weight: 900; line-height: 1.3; color: #1f2937; letter-spacing: -0.05em; margin: 0; padding: 0; }
+        .header-inputs { display: flex; flex-direction: row; align-items: center; gap: 0.1rem; width: 100%; margin-top: 0.5rem; flex-wrap: nowrap; }
+        .header-input { border: none; border-bottom: 2px solid #374151; text-align: center; font-weight: 900; font-size: 1.1rem; outline: none; height: 1.8rem; padding: 0; background: transparent; writing-mode: horizontal-tb; }
+        .header-input.short { width: 2.2rem; }
+        .header-input.name-input { flex-grow: 1; text-align: left; padding-left: 0.5rem; min-width: 100px; }
+        .name-label { font-weight: bold; white-space: nowrap; margin-left: 0.2rem; }
+        #score-display { font-size: 4.0rem; font-weight: 900; color: #dc2626; line-height: 1; }
+
+        .problems-container { flex-grow: 1; display: flex; flex-direction: column; justify-content: flex-start; }
+        .layout-2col { display: grid; grid-template-columns: 1fr 1fr; column-gap: 3rem; row-gap: 0; height: 100%; align-content: space-between; }
+
+        .problem-item { font-size: 1.05rem; display: flex; align-items: baseline; line-height: 1.4; width: 100%; page-break-inside: avoid; border-bottom: 1px dashed #e5e7eb; padding: 0.5rem 0; }
+        .problem-item.spacious { padding-top: 0.8rem; padding-bottom: 1.4rem; }
+        .problem-body.large-text { font-size: 1.25rem; width: 100%; text-align: left; }
+        .problem-body.huge-text { font-size: 1.8rem; display: flex; align-items: center; justify-content: flex-start; width: 100%; padding-left: 0.5rem; }
+        .problem-body.huge-text .math-text { font-size: 2.2rem; margin: 0 0.5rem; }
+        .problem-body.huge-text input.box { height: 3.2rem; width: 5.5rem; font-size: 2.2rem; }
+        
+        .problem-item.visual-problem { flex-direction: column; padding-bottom: 1rem; margin-bottom: 0.5rem; border-bottom: 1px dashed #cbd5e1; }
+        .problem-number { flex: 0 0 1.8rem; font-weight: bold; color: #9ca3af; }
+        .problem-body { flex-grow: 1; display: flex; flex-wrap: wrap; align-items: center; gap: 0.2rem; width: 100%; }
+        .math-text { font-weight: 800; color: #111827; }
+        
+        .fraction { display: inline-flex; flex-direction: column; align-items: center; vertical-align: middle; margin: 0 0.2rem; font-weight: bold; }
+        .fraction .numerator { border-bottom: 2px solid currentColor; padding: 0 0.2rem; line-height: 1; margin-bottom: 0px; }
+        .fraction .denominator { line-height: 1; padding-top: 0px; margin-top: 1px; }
+        
+        .input-wrapper { position: relative; display: inline-flex; align-items: center; justify-content: center; margin: 0 0.3rem; }
+
+        input.box {
+            height: 2.4rem; border: 2px solid #9ca3af; border-radius: 6px; font-weight: bold; text-align: center;
+            outline: none; background: #fcfcfc; width: 5rem; font-size: 1.25rem; z-index: 5;
+            -webkit-appearance: none; -moz-appearance: textfield; appearance: none;
+        }
+        input.box::-webkit-outer-spin-button, input.box::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        input.box:focus { border-color: #3b82f6; background-color: #eff6ff; }
+        
+        .mark-correct {
+            position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            width: 4.4rem; height: 4.4rem; border: 5px solid #ef4444; border-radius: 50%;
+            pointer-events: none; z-index: 10; display: none; opacity: 0.8;
+        }
+        .correct .mark-correct { display: block; animation: pop 0.2s ease-out; }
+        @keyframes pop { 0% { transform: translate(-50%, -50%) scale(1.5); opacity: 0; } 100% { transform: translate(-50%, -50%) scale(1); opacity: 0.8; } }
+        .incorrect input.box { border-color: #9ca3af; background-color: #f3f4f6; color: #6b7280; }
+
+        .correction-text {
+            color: #ef4444; font-weight: 900; font-size: 1.2rem; margin-left: 0.6rem;
+            font-family: 'Comic Sans MS', 'Chalkboard SE', sans-serif;
+            opacity: 0; animation: fadeIn 0.4s forwards;
+            position: relative; top: 1px;
+        }
+        @keyframes fadeIn { to { opacity: 1; } }
+
+        .problem-visual-row { display: flex; gap: 0.8rem; height: 130px; margin-top: 0.5rem; width: 100%; position: relative; }
+        .problems-container.layout-2col .problem-visual-row { height: 105px; }
+        .diagram-area { flex: 2; background-color: #fff; border: 1px solid #e5e7eb; border-radius: 8px; position: relative; overflow: hidden; }
+        .memo-area { flex: 1; background-color: #fff; border: 2px dashed #cbd5e1; border-radius: 8px; position: relative; overflow: hidden; cursor: crosshair; }
+        .drawing-canvas { display: block; width: 100%; height: 100%; position: absolute; top: 0; left: 0; z-index: 10; }
+        .problem-visual-row.full-memo .diagram-area { display: none; }
+        .problem-visual-row.full-memo .memo-area { flex: 1; width: 100%; }
+        .memo-label { position: absolute; top: 4px; left: 6px; font-size: 0.75rem; color: #94a3b8; font-weight: bold; pointer-events: none; z-index: 5; }
+        .btn-clear {
+            position: absolute; top: 4px; right: 4px; background: rgba(241, 245, 249, 0.9); border: 1px solid #cbd5e1;
+            border-radius: 4px; width: 24px; height: 24px; font-size: 16px; color: #64748b;
+            cursor: pointer; z-index: 20; display: flex; align-items: center; justify-content: center;
+        }
+        
+        .controls { width: 100%; max-width: 210mm; margin: 10px auto; display: flex; gap: 1rem; justify-content: center; }
+        .btn-control {
+            font-weight: bold; padding: 0.75rem 1.5rem; border-radius: 9999px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); cursor: pointer; border: none; font-size: 1rem;
+        }
+        
+        #result-modal {
+            position: fixed; inset: 0; background: rgba(0, 0, 0, 0.7); display: none;
+            justify-content: center; align-items: center; z-index: 2000; backdrop-filter: blur(4px);
+        }
+        #result-modal.show { display: flex; }
+        .modal-content { background: white; padding: 3rem; border-radius: 2rem; text-align: center; width: 520px; }
+        #confetti-canvas { position: fixed; inset: 0; pointer-events: none; z-index: 9999; }
+
+        @media print {
+            body { background: none; display: block; padding: 0; margin: 0; }
+            #home-screen, .controls, #result-modal, #confetti-canvas { display: none !important; }
+            .sheet { width: 210mm; height: 296mm; page-break-after: always; padding: 10mm 15mm; margin: 0; box-shadow: none; border: none; }
+            #print-area { display: block !important; }
+            .drawing-canvas, .btn-clear { display: none !important; }
+            .layout-2col .problem-item.spacious { padding-bottom: 1.1rem; }
+            .problem-item.visual-problem { padding-bottom: 0.4rem; margin-bottom: 0.4rem; }
+            .problem-visual-row { height: 105px; }
+            .header-title h1 { line-height: 1.3; font-size: 3.2rem !important; }
+            .mark-correct { display: none !important; }
+            .correction-text { display: none !important; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Home Screen -->
+    <div id="home-screen" class="screen active">
+        <h1 class="text-4xl md:text-5xl font-black text-indigo-600 mb-2 tracking-tight">倍の見方・割合マスター Ver.3.1</h1>
+        <p class="text-gray-500 font-bold mb-8 text-center px-4">わかる、解ける、自信がつく！「割合」の世界を完ぺきに攻略しよう！</p>
+        
+        <!-- 各ボタンに data-grade と data-mode を付与 -->
+        <div class="grade-columns">
+            <div class="grade-column gc-2">
+                <div class="grade-header text-rose-500">2年生</div>
+                <button class="unit-btn" data-g="2" data-m="0" onclick="window.app.startDrill(2, 0)">かけ算 (20問)<span class="badge"></span></button>
+                <button class="unit-btn" data-g="2" data-m="1" onclick="window.app.startDrill(2, 1)">ばいの数①<span class="badge"></span></button>
+                <button class="unit-btn" data-g="2" data-m="2" onclick="window.app.startDrill(2, 2)">ばいの数②<span class="badge"></span></button>
+                <button class="unit-btn" data-g="2" data-m="3" onclick="window.app.startDrill(2, 3)">長さとかさのばい①<span class="badge"></span></button>
+                <button class="unit-btn" data-g="2" data-m="4" onclick="window.app.startDrill(2, 4)">長さとかさのばい②<span class="badge"></span></button>
+            </div>
+            <div class="grade-column gc-3">
+                <div class="grade-header text-orange-500">3年生</div>
+                <button class="unit-btn" data-g="3" data-m="0" onclick="window.app.startDrill(3, 0)">倍の計算①<span class="badge"></span></button>
+                <button class="unit-btn" data-g="3" data-m="1" onclick="window.app.startDrill(3, 1)">倍の計算②<span class="badge"></span></button>
+                <button class="unit-btn" data-g="3" data-m="2" onclick="window.app.startDrill(3, 2)">文章題 (10問)<span class="badge"></span></button>
+                <button class="unit-btn" data-g="3" data-m="3" onclick="window.app.startDrill(3, 3)">分数の倍①<span class="badge"></span></button>
+                <button class="unit-btn" data-g="3" data-m="4" onclick="window.app.startDrill(3, 4)">分数の倍②<span class="badge"></span></button>
+            </div>
+            <div class="grade-column gc-4">
+                <div class="grade-header text-yellow-500">4年生</div>
+                <button class="unit-btn" data-g="4" data-m="0" onclick="window.app.startDrill(4, 0)">何倍（整数）<span class="badge"></span></button>
+                <button class="unit-btn" data-g="4" data-m="1" onclick="window.app.startDrill(4, 1)">何倍（小数）<span class="badge"></span></button>
+                <button class="unit-btn" data-g="4" data-m="2" onclick="window.app.startDrill(4, 2)">倍の見方（整数）<span class="badge"></span></button>
+                <button class="unit-btn" data-g="4" data-m="3" onclick="window.app.startDrill(4, 3)">倍の見方（小数）<span class="badge"></span></button>
+                <button class="unit-btn" data-g="4" data-m="4" onclick="window.app.startDrill(4, 4)">小数のわり算<span class="badge"></span></button>
+            </div>
+            <div class="grade-column gc-5">
+                <div class="grade-header text-green-500">5年生</div>
+                <button class="unit-btn" data-g="5" data-m="0" onclick="window.app.startDrill(5, 0)">割合を求める<span class="badge"></span></button>
+                <button class="unit-btn" data-g="5" data-m="1" onclick="window.app.startDrill(5, 1)">比べられる量<span class="badge"></span></button>
+                <button class="unit-btn" data-g="5" data-m="2" onclick="window.app.startDrill(5, 2)">もとにする量<span class="badge"></span></button>
+                <button class="unit-btn" data-g="5" data-m="3" onclick="window.app.startDrill(5, 3)">百分率の問題<span class="badge"></span></button>
+                <button class="unit-btn" data-g="5" data-m="4" onclick="window.app.startDrill(5, 4)">百分率と割引<span class="badge"></span></button>
+            </div>
+            <div class="grade-column gc-6">
+                <div class="grade-header text-blue-500">6年生</div>
+                <button class="unit-btn" data-g="6" data-m="0" onclick="window.app.startDrill(6, 0)">比を簡単に (20問)<span class="badge"></span></button>
+                <button class="unit-btn" data-g="6" data-m="1" onclick="window.app.startDrill(6, 1)">比の値 (20問)<span class="badge"></span></button>
+                <button class="unit-btn" data-g="6" data-m="2" onclick="window.app.startDrill(6, 2)">比例配分 (計算)<span class="badge"></span></button>
+                <button class="unit-btn" data-g="6" data-m="3" onclick="window.app.startDrill(6, 3)">比例配分 (文章題)<span class="badge"></span></button>
+                <button class="unit-btn" data-g="6" data-m="4" onclick="window.app.startDrill(6, 4)">拡大図・縮図<span class="badge"></span></button>
+            </div>
+        </div>
+        <div class="mt-8 text-center">
+            <button onclick="window.app.resetProgress()" class="text-sm text-gray-400 hover:text-rose-500 underline">学習記録をリセットする</button>
+        </div>
+    </div>
+
+    <!-- Drill Screen -->
+    <div id="drill-screen" class="screen">
+        <div class="controls">
+            <button onclick="window.app.goHome()" class="btn-control bg-gray-500 text-white">🏠 戻る</button>
+            <button onclick="window.app.generateProblems()" class="btn-control bg-indigo-600 text-white">🔄 問題をつくる</button>
+            <button onclick="window.app.checkAnswers()" class="btn-control bg-rose-500 text-white">💮 答えあわせ</button>
+            <button onclick="window.app.printSheets()" class="btn-control bg-slate-700 text-white">🖨️ 印刷する</button>
+        </div>
+
+        <div class="sheet" id="active-sheet">
+            <div class="header-row">
+                <div class="header-box">
+                    <div class="text-gray-500 font-bold text-sm" id="header-grade-text">年生 算数</div>
+                    <div class="header-title"><h1 id="header-title-text">タイトル</h1></div>
+                    <div class="header-inputs text-gray-800">
+                        <input type="text" class="header-input short"><span>年</span>
+                        <input type="text" class="header-input short"><span>組</span>
+                        <input type="text" class="header-input short"><span>番</span>
+                        <span class="name-label">名前</span>
+                        <input type="text" class="header-input name-input">
+                    </div>
+                </div>
+                <div class="score-container">
+                    <div class="text-gray-600 font-bold text-left text-xs mb-1">点数</div>
+                    <div class="flex items-baseline justify-end pr-6">
+                        <span id="score-display" class="text-7xl font-black text-red-600 leading-none"></span>
+                    </div>
+                </div>
+            </div>
+            <div class="problems-container" id="problems-container"></div>
+        </div>
+    </div>
+
+    <div id="print-area"></div>
+    <canvas id="confetti-canvas"></canvas>
+    <div id="result-modal">
+        <div class="modal-content">
+            <h2 class="text-3xl font-black mb-2 text-gray-800">結果は...</h2>
+            <div id="modal-score" class="text-9xl font-black text-rose-500 mb-6"></div>
+            <div id="modal-message" class="text-xl font-bold text-gray-700 mb-8"></div>
+            <button class="btn-control bg-blue-600 text-white px-10 mx-auto text-lg" onclick="window.app.closeModal()">とじる</button>
+        </div>
+    </div>
+
+    <script>
+        class MathApp {
+            constructor() {
+                this.currentGrade = 2;
+                this.currentMode = 0;
+                this.currentProblems = [];
+                this.shuffledPool = [];
+                this.modal = document.getElementById('result-modal');
+                this.canvas = document.getElementById('confetti-canvas');
+                this.ctx = this.canvas.getContext('2d');
+                this.particles = [];
+                this.animationId = null;
+                this.STORAGE_KEY = 'mathMaster_v2_progress';
+
+                this.resizeCanvas = this.resizeCanvas.bind(this);
+                window.addEventListener('resize', this.resizeCanvas);
+                this.resizeCanvas();
+
+                this.CONFIG = {
+                    2: [
+                        { name: "かけ算 (九九)", type: "kakezan_basic", count: 20 },
+                        { name: "ばいの数①", type: "bai_times_1", count: 20 },
+                        { name: "ばいの数②", type: "bai_times_2", count: 20 },
+                        { name: "長さとかさのばい①", type: "length_volume_bai_1", count: 20 },
+                        { name: "長さとかさのばい②", type: "length_volume_bai_2", count: 20 }
+                    ],
+                    3: [
+                        { name: "倍の計算①", type: "bai_calc_1", count: 20 },
+                        { name: "倍の計算②", type: "bai_calc_2", count: 20 },
+                        { name: "文章題 (10問)", type: "bai_word", count: 10 },
+                        { name: "分数の倍①", type: "fraction_part_1", count: 20 },
+                        { name: "分数の倍②", type: "fraction_part_2", count: 20 }
+                    ],
+                    4: [
+                        { name: "何倍（整数）", type: "find_bai_4patterns", count: 20 },
+                        { name: "何倍（小数）", type: "find_bai_decimal_4patterns", count: 20 },
+                        { name: "倍の見方（整数）", type: "bai_mikata_random", count: 5 },
+                        { name: "倍の見方（小数）", type: "bai_mikata_decimal", count: 5 },
+                        { name: "小数のわり算", type: "decimal_div_word", count: 5 }
+                    ],
+                    5: [
+                        { name: "割合を求める", type: "ratio_p1", count: 5 },
+                        { name: "比べられる量", type: "ratio_p2", count: 5 },
+                        { name: "もとにする量", type: "ratio_p3", count: 5 },
+                        { name: "百分率の問題", type: "ratio_p4", count: 5 },
+                        { name: "百分率と割引", type: "ratio_p5", count: 5 }
+                    ],
+                    6: [
+                        { name: "比を簡単に (20問)", type: "simplify_ratio", count: 20 },
+                        { name: "比の値 (20問)", type: "ratio_value", count: 20 },
+                        { name: "比例配分 (計算)", type: "proportional_dist", count: 20 },
+                        { name: "比例配分 (文章題)", type: "proportional_dist_word", count: 5 },
+                        { name: "拡大図・縮図", type: "scale_map", count: 5 }
+                    ]
+                };
+
+                this.updateHomeBadges();
+            }
+
+            resizeCanvas() {
+                if (this.canvas) {
+                    this.canvas.width = window.innerWidth;
+                    this.canvas.height = window.innerHeight;
+                }
+            }
+
+            getRandomInt(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+
+            saveProgress(grade, mode, score) {
+                const data = JSON.parse(localStorage.getItem(this.STORAGE_KEY) || '{}');
+                const key = `${grade}_${mode}`;
+                const currentScore = data[key] || 0;
+                if (score >= currentScore) {
+                    data[key] = score;
+                    localStorage.setItem(this.STORAGE_KEY, JSON.stringify(data));
+                }
+            }
+
+            updateHomeBadges() {
+                const data = JSON.parse(localStorage.getItem(this.STORAGE_KEY) || '{}');
+                const buttons = document.querySelectorAll('.unit-btn');
+                buttons.forEach(btn => {
+                    const g = btn.dataset.g;
+                    const m = btn.dataset.m;
+                    const key = `${g}_${m}`;
+                    const score = data[key];
+                    const badgeSpan = btn.querySelector('.badge');
+                    
+                    if (badgeSpan) {
+                        badgeSpan.className = 'badge';
+                        badgeSpan.textContent = '';
+                        if (score === 100) {
+                            badgeSpan.textContent = '👑';
+                            badgeSpan.classList.add('perfect');
+                        } else if (score >= 80) {
+                            badgeSpan.textContent = '★';
+                            badgeSpan.classList.add('gold');
+                        }
+                    }
+                });
+            }
+
+            resetProgress() {
+                if(confirm("学習記録をすべて消しますか？")) {
+                    localStorage.removeItem(this.STORAGE_KEY);
+                    this.updateHomeBadges();
+                }
+            }
+
+            startDrill(grade, modeIndex) {
+                this.currentGrade = grade;
+                this.currentMode = modeIndex;
+                const config = this.CONFIG[grade][modeIndex];
+                document.getElementById('home-screen').classList.remove('active');
+                document.getElementById('drill-screen').classList.add('active');
+                document.getElementById('header-grade-text').textContent = `${grade}年生 算数`;
+                
+                const titleEl = document.getElementById('header-title-text');
+                titleEl.textContent = config.name;
+                
+                if (config.name.length > 12) { titleEl.style.fontSize = '2.4rem'; } 
+                else if (config.name.length > 9) { titleEl.style.fontSize = '2.8rem'; } 
+                else { titleEl.style.fontSize = '3.4rem'; }
+
+                document.getElementById('score-display').textContent = '';
+                this.generateProblems();
+            }
+
+            goHome() {
+                document.getElementById('drill-screen').classList.remove('active');
+                document.getElementById('home-screen').classList.add('active');
+                this.stopConfetti();
+                this.updateHomeBadges();
+            }
+
+            // --- Problem Generation Logic ---
+
+            playFanfare() {
+                try {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    if (!AudioContext) return;
+                    const ctx = new AudioContext();
+
+                    const playNote = (freq, time, dur) => {
+                        const osc = ctx.createOscillator();
+                        const gain = ctx.createGain();
+                        osc.type = 'triangle'; 
+                        osc.frequency.setValueAtTime(freq, time);
+                        gain.gain.setValueAtTime(0.3, time);
+                        gain.gain.exponentialRampToValueAtTime(0.01, time + dur - 0.05);
+                        osc.connect(gain);
+                        gain.connect(ctx.destination);
+                        osc.start(time);
+                        osc.stop(time + dur);
+                    };
+
+                    const now = ctx.currentTime;
+                    playNote(392.00, now + 0.0, 0.15); // G4
+                    playNote(523.25, now + 0.15, 0.15); // C5
+                    playNote(659.25, now + 0.30, 0.15); // E5
+                    playNote(783.99, now + 0.45, 0.30); // G5
+                    playNote(1046.50, now + 0.75, 1.2); // C6
+                    playNote(523.25, now + 0.75, 1.2); // C5
+                    playNote(659.25, now + 0.75, 1.2); // E5
+
+                } catch (e) {
+                    console.error("Audio play failed", e);
+                }
+            }
+
+            getKakezanPool() {
+                let pool = [];
+                for(let i=2; i<=9; i++) {
+                    for(let j=2; j<=9; j++) {
+                        pool.push({ 
+                            html: `<div class="flex items-center text-xl justify-start w-full text-left pl-4"><span class="math-text text-2xl">${i}</span> <span class="math-text text-2xl">×</span> <span class="math-text text-2xl">${j}</span> <span class="math-text text-2xl">＝</span> <div class="input-wrapper"><input type="text" class="box" data-ans="${i*j}"><div class="mark-correct"></div></div></div>`, 
+                            answer: i*j 
+                        });
+                    }
+                }
+                return pool;
+            }
+
+            getGrade2Pool(type) {
+                let pool = [];
+                const units = type.startsWith("bai_times") ? ["こ"] : ["mm", "cm", "m", "mL", "dL", "L"];
+                const isBasic = type.includes("1");
+                const bMin = 2, bMax = 9;
+                const tMin = isBasic ? 2 : 6, tMax = isBasic ? 5 : 9;
+                for(let b=bMin; b<=bMax; b++) {
+                    for(let t=tMin; t<=tMax; t++) {
+                        const unit = units[Math.floor(Math.random()*units.length)];
+                        pool.push({ text: `<span class="math-text">${b}</span>${unit}の <span class="math-text">${t}</span>ばいは 何${unit}ですか。`, answer: b * t, unit: unit });
+                    }
+                }
+                return pool; 
+            }
+
+            getGrade3BaiCalcPool(type) {
+                let pool = [];
+                const units = ["cm", "m", "dL", "L", "g", "kg"];
+                const isBasic = type.includes("1");
+                
+                let pairs = [];
+                if (isBasic) {
+                    // ①: base 2~9, ratio 2~9 (64通り)
+                    for(let b=2; b<=9; b++) {
+                        for(let r=2; r<=9; r++) {
+                            pairs.push({b, r});
+                        }
+                    }
+                } else {
+                    // ②: base 10~50, ratio 2~6
+                    const seen = new Set();
+                    while(pairs.length < 30) {
+                        let b = this.getRandomInt(10, 50);
+                        let r = this.getRandomInt(2, 6);
+                        let key = `${b}_${r}`;
+                        if(!seen.has(key)) {
+                            seen.add(key);
+                            pairs.push({b, r});
+                        }
+                    }
+                }
+                
+                pairs.sort(() => Math.random() - 0.5);
+
+                for(let i=0; i<pairs.length; i++) {
+                    const unit = units[i % units.length];
+                    const {b, r} = pairs[i];
+                    let total = b * r;
+                    let p = i % 3;
+                    
+                    if (p === 0) pool.push({ text: `<span class="math-text">${b}</span>${unit}の <span class="math-text">${r}</span>倍は 何${unit}ですか。`, answer: total, unit: unit, base: b, ratio: r });
+                    else if (p === 1) pool.push({ text: `<span class="math-text">${total}</span>${unit}は <span class="math-text">${b}</span>${unit}の 何倍ですか。`, answer: r, unit: "倍", base: b, compare: total });
+                    else pool.push({ text: `<span class="math-text">${total}</span>${unit}は 何${unit}の <span class="math-text">${r}</span>倍ですか。`, answer: b, unit: unit, ratio: r, compare: total });
+                }
+                return pool;
+            }
+
+            getGrade3WordPool() {
+                return [
+                    { text: "赤いひもは <span class='math-text'>12</span>cm, 青いひもは <span class='math-text'>4</span>cmです。赤いひもは青いひもの何倍ですか。", answer: 3, unit: "倍", base: 4, compare: 12, ratio: 3 },
+                    { text: "おはじきが <span class='math-text'>15</span>個あります。ビー玉はその <span class='math-text'>5</span>倍あります。ビー玉は何個ですか。", answer: 75, unit: "個", base: 15, ratio: 5 },
+                    { text: "クッキーが <span class='math-text'>24</span>個あります。これはチョコの <span class='math-text'>3</span>倍です。チョコは何個ですか。", answer: 8, unit: "個", compare: 24, ratio: 3 },
+                    { text: "兄の体重は <span class='math-text'>40</span>kg, 弟は <span class='math-text'>20</span>kgです。兄は弟の何倍ですか。", answer: 2, unit: "倍", base: 20, compare: 40, ratio: 2 },
+                    { text: "ノートが <span class='math-text'>120</span>円, 鉛筆が <span class='math-text'>60</span>円。ノートは鉛筆の何倍ですか。", answer: 2, unit: "倍", base: 60, compare: 120, ratio: 2 },
+                    { text: "公園に子どもが <span class='math-text'>18</span>人, 大人はその <span class='math-text'>2</span>倍です。大人は何人ですか。", answer: 36, unit: "人", base: 18, ratio: 2 },
+                    { text: "バケツに水が <span class='math-text'>8</span>L入っています。水そうにはその <span class='math-text'>4</span>倍入ります。水そうは何Lですか。", answer: 32, unit: "L", base: 8, ratio: 4 },
+                    { text: "赤いリボンが <span class='math-text'>45</span>cmあります。これは白いリボンの <span class='math-text'>5</span>倍です。白は何cmですか。", answer: 9, unit: "cm", compare: 45, ratio: 5 }
+                ].sort(() => Math.random() - 0.5);
+            }
+
+            getFractionPartPool(type) {
+                let pool = [];
+                // 全パターンを生成して重複を防ぐ (4つの分母 × 1~9倍 = 36通り)
+                const dMin = type.endsWith("1") ? 2 : 6;
+                const dMax = type.endsWith("1") ? 5 : 9;
+                
+                for(let d = dMin; d <= dMax; d++) {
+                    for(let m = 1; m <= 9; m++) {
+                        const v = d * m;
+                        pool.push({ 
+                            html: `<div class="flex items-center text-xl justify-start w-full text-left pl-4"><span class="math-text text-2xl">${v}</span>この <span class="fraction ml-2"><span class="numerator text-xl">${1}</span><span class="denominator text-xl">${d}</span></span>は <div class="input-wrapper ml-2"><input type="text" class="box" data-ans="${m}"><div class="mark-correct"></div></div>こ</div>`, 
+                            answer: m 
+                        });
+                    }
+                }
+                return pool.sort(() => Math.random() - 0.5);
+            }
+
+            getFindBaiPool(type) {
+                let pool = [];
+                const units = ["cm", "m", "kg", "g", "L", "dL", "mL", "円"];
+                const isDecimal = type.includes("decimal");
+                
+                let pairs = [];
+                if (isDecimal) {
+                    const bases = [20, 30, 40, 50, 60, 70, 80, 90];
+                    const ratios = [1.2, 1.5, 2.4, 2.5, 3.2];
+                    for (let b of bases) {
+                        for (let t of ratios) {
+                            pairs.push({ b, t });
+                        }
+                    }
+                } else {
+                    // Integer case: Base is 3 digits (100-999), Ratio is 2-9
+                    // Constraint 1: Result must be <= 999 (No 4-digit numbers)
+                    // Constraint 2: Base's ones digit must be 0 (e.g. 120, 350)
+                    const seen = new Set();
+                    let attempts = 0;
+                    while(pairs.length < 35 && attempts < 1000) { 
+                        attempts++;
+                        let t = this.getRandomInt(2, 9);
+                        
+                        // Calculate max base to keep product <= 999
+                        let maxB = Math.floor(999 / t);
+                        
+                        // Base must be at least 100 and have ones digit 0.
+                        // So we look for multiples of 10 in range [100, maxB].
+                        // Range for (b/10) is [10, floor(maxB/10)].
+                        let minDiv10 = 10;
+                        let maxDiv10 = Math.floor(maxB / 10);
+
+                        if (maxDiv10 < minDiv10) continue; // Can't form a 3-digit number
+
+                        let val = this.getRandomInt(minDiv10, maxDiv10);
+                        let b = val * 10;
+                        
+                        let key = `${b}_${t}`;
+                        if (!seen.has(key)) {
+                            seen.add(key);
+                            pairs.push({ b, t });
+                        }
+                    }
+                }
+
+                pairs.sort(() => Math.random() - 0.5);
+
+                const count = Math.min(pairs.length, 35);
+                for(let i=0; i<count; i++) {
+                    const pData = pairs[i];
+                    const b = pData.b;
+                    const t = pData.t;
+                    const total = Math.round(b * t * 10)/10;
+                    
+                    const unit = units[i % units.length]; 
+                    const p = i % 3;
+
+                    if (p === 0) pool.push({ text: `<span class="math-text">${total}</span>${unit}は <span class="math-text">${b}</span>${unit}の 何倍ですか。`, answer: t, unit: "倍", base: b, compare: total, ratio: t }); 
+                    else if (p === 1) pool.push({ text: `<span class="math-text">${b}</span>${unit}の <span class="math-text">${t}</span>倍は 何${unit}ですか。`, answer: total, unit: unit, base: b, compare: null, ratio: t }); 
+                    else pool.push({ text: `<span class="math-text">${total}</span>${unit}は 何${unit}の <span class="math-text">${t}</span>倍ですか。`, answer: b, unit: unit, base: null, compare: total, ratio: t }); 
+                }
+                
+                return pool;
+            }
+
+            get4thGradeDecimalDivWordPool() {
+                const subjs = [{ n: "リボン", u: "m" }, { n: "針金", u: "kg" }, { n: "ジュース", u: "L" }, { n: "砂糖", u: "kg" }];
+                let pool = [];
+                for(let i=0; i<15; i++) {
+                    const item = subjs[i % subjs.length], ansVal = this.getRandomInt(11, 35) / 10, div = this.getRandomInt(3, 8), total = Math.round(ansVal * div * 10) / 10;
+                    pool.push({ text: `<span class="math-text">${total}</span>${item.u}の${item.n}を <span class="math-text">${div}</span>人で等しく分けます。1人分は何${item.u}ですか。`, answer: ansVal, unit: item.u, diagramParams: { type: 'tape', base: null, compare: total, ratio: div, label1: "1人分", label2: "全体", unitLabel: item.u, baseIsTop: false } });
+                }
+                return pool.sort(() => Math.random() - 0.5);
+            }
+
+            get4thGradeMikataPool(type) {
+                const scenarios = [
+                    { id: 'm1', sub: "長さ", u: "cm", l1: "のばす前のゴム", l2: "のばした後", bMin: 10, bMax: 20 },
+                    { id: 'm2', sub: "重さ", u: "kg", l1: "弟の体重", l2: "兄の体重", bMin: 20, bMax: 35 },
+                    { id: 'm3', sub: "値段", u: "円", l1: "消しゴム", l2: "ノート", bMin: 50, bMax: 80 },
+                    { id: 'm4', sub: "かさ", u: "dL", l1: "コップ", l2: "水そう", bMin: 2, bMax: 5 },
+                    { id: 'm5', sub: "長さ", u: "m", l1: "花だんの横", l2: "花だんのたて", bMin: 3, bMax: 8 },
+                    { id: 'm6', sub: "重さ", u: "g", l1: "みかん", l2: "りんご", bMin: 50, bMax: 100 },
+                    { id: 'm7', sub: "長さ", u: "cm", l1: "リボンA", l2: "リボンB", bMin: 15, bMax: 30 },
+                    { id: 'm8', sub: "貯金", u: "円", l1: "妹", l2: "姉", bMin: 100, bMax: 500 }
+                ];
+                let pool = [];
+                for (let sc of scenarios) {
+                    const ratios = type.includes("decimal") ? [1.2, 1.5, 2.4, 2.5, 3.5] : [2, 3, 4, 5, 6];
+                    for (let r of ratios) {
+                        for(let k=0; k<1; k++) { 
+                             let b = this.getRandomInt(sc.bMin, sc.bMax);
+                             if (sc.sub === "値段" || sc.sub === "貯金") b = Math.ceil(b / 10) * 10;
+                             
+                             let c = Math.round(b * r * 10) / 10;
+                             
+                             // 修正：重さが80kgを超えないように制限
+                             if (sc.sub === "重さ" && sc.u === "kg" && c > 80) continue;
+
+                             pool.push({ 
+                                text: `${sc.l2}の${sc.sub}は <span class="math-text">${c}</span>${sc.u}, ${sc.l1}の${sc.sub}は <span class="math-text">${b}</span>${sc.u} です。${sc.l2}の${sc.sub}は${sc.l1}の${sc.sub}の何倍ですか。`, 
+                                answer: r, unit: "倍", base: b, compare: c, ratio: null, bl: sc.l1, cl: sc.l2, scenarioId: sc.id,
+                                diagramParams: { type: 'tape', base: b, compare: c, ratio: null, label1: sc.l1, label2: sc.l2, unitLabel: sc.u, baseIsTop: true }
+                            });
+                        }
+                    }
+                }
+                return pool.sort(() => Math.random() - 0.5);
+            }
+
+            get5thGradePercentPool() {
+                const scenarios = [
+                    { id: 'p1', label: '定員', q: (b,c)=>`定員<span class="math-text">${b}</span>人のホールに、<span class="math-text">${c}</span>人が集まりました。定員をもとにした人数の割合は何％ですか。`, bl: "定員", cl: "人数", unit: "人", minRatio: 0.5 },
+                    { id: 'p2', label: '読書', q: (b,c)=>`<span class="math-text">${b}</span>ページの物語の本を、<span class="math-text">${c}</span>ページ読みました。全体をもとにした読んだページの割合は何％ですか。`, bl: "全体", cl: "読んだ", unit: "ページ" },
+                    { id: 'p3', label: 'シュート', q: (b,c)=>`バスケットボールで<span class="math-text">${b}</span>回シュートをして、<span class="math-text">${c}</span>回入りました。シュート数をもとにした成功の割合は何％ですか。`, bl: "全部", cl: "成功", unit: "回" },
+                    { id: 'p4', label: '面積', q: (b,c)=>`公園の面積は<span class="math-text">${b}</span>m²で、そのうち<span class="math-text">${c}</span>m²が花だんです。全体をもとにした花だんの割合は何％ですか。`, bl: "全体", cl: "花だん", unit: "m²" },
+                    { id: 'p5', label: '所持金', q: (b,c)=>`持っていた<span class="math-text">${b}</span>円のうち、<span class="math-text">${c}</span>円を使いました。持っていたお金をもとにした使ったお金の割合は何％ですか。`, bl: "最初", cl: "使った", unit: "円" },
+                    { id: 'p6', label: '人数', q: (b,c)=>`5年生全体の人数は<span class="math-text">${b}</span>人で、そのうちメガネをかけている人は<span class="math-text">${c}</span>人です。全体をもとにした割合は何％ですか。`, bl: "全体", cl: "メガネ", unit: "人" },
+                    { id: 'p7', label: '個数', q: (b,c)=>`箱にみかんが<span class="math-text">${b}</span>個入っていて、そのうち<span class="math-text">${c}</span>個が腐っていました。全体をもとにした腐ったみかんの割合は何％ですか。`, bl: "全体", cl: "腐った", unit: "個" },
+                    { id: 'p8', label: '長さ', q: (b,c)=>`全長<span class="math-text">${b}</span>kmのハイキングコースを、<span class="math-text">${c}</span>km歩きました。全体をもとにした歩いた距離の割合は何％ですか。`, bl: "全長", cl: "歩いた", unit: "km" },
+                    { id: 'p9', label: '乗車率', q: (b,c)=>`定員<span class="math-text">${b}</span>人の電車に、<span class="math-text">${c}</span>人が乗っています。定員をもとにした乗車率は何％ですか。`, bl: "定員", cl: "乗客", unit: "人", allowOver100: true, minRatio: 0.5 },
+                    { id: 'p10', label: '勝敗', q: (b,c)=>`サッカーチームが<span class="math-text">${b}</span>試合を行い、<span class="math-text">${c}</span>試合勝ちました。試合数をもとにした勝った割合は何％ですか。`, bl: "試合数", cl: "勝ち", unit: "試合" }
+                ];
+                
+                let pool = [];
+                const ratios = [0.1, 0.2, 0.25, 0.4, 0.5, 0.6, 0.75, 0.8, 0.9, 1.2, 1.25, 1.5];
+                
+                scenarios.forEach(sc => {
+                    ratios.forEach(r => {
+                        if (!sc.allowOver100 && r > 1.0) return;
+                        if (r === 1.0) return; 
+                        if (sc.minRatio && r < sc.minRatio) return; 
+
+                        let found = false;
+                        let b, c;
+                        
+                        for(let k=0; k<15; k++) {
+                             b = this.getRandomInt(1, 20) * 10; 
+                             if (sc.label === '人数' || sc.label === '定員' || sc.label === '乗車率') b = this.getRandomInt(2, 10) * 10;
+                             if (sc.label === '所持金') b = this.getRandomInt(5, 20) * 100;
+                             if (sc.label === '長さ') b = this.getRandomInt(5, 20); 
+                             if (sc.label === '勝敗') b = this.getRandomInt(10, 30);
+                             
+                             let val = b * r;
+                             if (Math.abs(Math.round(val) - val) < 0.0001) {
+                                 c = Math.round(val);
+                                 found = true;
+                                 break;
+                             }
+                        }
+                        
+                        if (found) {
+                            let ans = Math.round(r * 100);
+                            pool.push({
+                                html: `<div class="w-full text-left text-lg">${sc.q(b, c)}</div><div class="w-full text-right mt-2 flex justify-end items-center">答え <div class="input-wrapper mx-2"><input type="text" class="box w-20" data-ans="${ans}"><div class="mark-correct"></div></div>％</div>`,
+                                answer: ans,
+                                unitLabel: "%",
+                                scenarioId: sc.id,
+                                diagramParams: { type: 'tape', base: b, compare: c, ratio: null, label1: sc.bl, label2: sc.cl, unitLabel: sc.unit }
+                            });
+                        }
+                    });
+                });
+                return pool.sort(() => Math.random() - 0.5);
+            }
+
+            get5thGradeDiscountPool() {
+                let pool = [];
+                // 1. 割引後の値段
+                const p1_ratios = [0.1, 0.2, 0.25, 0.3, 0.4, 0.5];
+                const p1_prices = [1000, 1500, 2000, 2500, 3000, 4000, 5000];
+                p1_ratios.forEach(r => {
+                    p1_prices.forEach(p => {
+                        let ans = p * (1 - r);
+                        pool.push({
+                            html: `<div class="w-full text-left text-lg"><span class="math-text">${p}</span>円の品物を、定価の<span class="math-text">${Math.round(r*100)}</span>％引きで買いました。代金はいくらですか。</div><div class="w-full text-right mt-2 flex justify-end items-center">答え <div class="input-wrapper mx-2"><input type="text" class="box w-24" data-ans="${ans}"><div class="mark-correct"></div></div>円</div>`,
+                            answer: ans,
+                            unitLabel: "円",
+                            scenarioId: 'd1_' + r + '_' + p,
+                            diagramParams: { type: 'tape', base: p, compare: null, ratio: 1-r, label1: "定価", label2: "代金", unitLabel: "円" }
+                        });
+                    });
+                });
+
+                // 2. 利益を見込んだ値段
+                const p2_ratios = [0.1, 0.2, 0.3, 0.4, 0.5];
+                const p2_costs = [500, 800, 1000, 1200, 1500, 2000];
+                p2_ratios.forEach(r => {
+                    p2_costs.forEach(c => {
+                        let ans = c * (1 + r);
+                        pool.push({
+                            html: `<div class="w-full text-left text-lg">仕入れ値<span class="math-text">${c}</span>円の品物に、仕入れ値の<span class="math-text">${Math.round(r*100)}</span>％の利益を見込んで定価をつけました。定価はいくらですか。</div><div class="w-full text-right mt-2 flex justify-end items-center">答え <div class="input-wrapper mx-2"><input type="text" class="box w-24" data-ans="${ans}"><div class="mark-correct"></div></div>円</div>`,
+                            answer: ans,
+                            unitLabel: "円",
+                            scenarioId: 'd2_' + r + '_' + c,
+                            diagramParams: { type: 'tape', base: c, compare: null, ratio: 1+r, label1: "仕入れ値", label2: "定価", unitLabel: "円" }
+                        });
+                    });
+                });
+
+                // 3. 割引率
+                const p3_ratios = [0.1, 0.2, 0.25, 0.3, 0.4, 0.5];
+                const p3_prices = [1000, 2000, 3000, 4000, 5000];
+                p3_ratios.forEach(r => {
+                    p3_prices.forEach(p => {
+                        let sell = p * (1 - r);
+                        pool.push({
+                            html: `<div class="w-full text-left text-lg">定価<span class="math-text">${p}</span>円の品物を、<span class="math-text">${sell}</span>円で売りました。定価の何％引きになりましたか。</div><div class="w-full text-right mt-2 flex justify-end items-center">答え <div class="input-wrapper mx-2"><input type="text" class="box w-20" data-ans="${Math.round(r * 100)}"><div class="mark-correct"></div></div>％引き</div>`,
+                            answer: Math.round(r * 100),
+                            unitLabel: "%",
+                            scenarioId: 'd3_' + r + '_' + p,
+                            diagramParams: { type: 'tape', base: p, compare: sell, ratio: null, label1: "定価", label2: "売値", unitLabel: "円" }
+                        });
+                    });
+                });
+
+                return pool.sort(() => Math.random() - 0.5);
+            }
+
+            get5thGradePool(type) {
+                let pool = [];
+                const ratioList = [0.2, 0.4, 0.5, 0.6, 0.8, 1.2, 1.4, 1.5];
+
+                const scenarios = [
+                    { id: 'b', t1: (b,c)=>`バスケットボールのシュートを <span class="math-text">${b}</span>本打って, <span class="math-text">${c}</span>本入りました。割合を求めましょう。`, t2: (b,r)=>`シュートを <span class="math-text">${b}</span>本打ちました。入った数はその <span class="math-text">${r}</span>倍です。何本入りましたか。`, t3: (c,r)=>`シュートが <span class="math-text">${c}</span>本入りました。打った数の <span class="math-text">${r}</span>倍です。何本打ちましたか。`, ul: "本", bl: "打った数", cl: "入った数", gen: (r) => { 
+                        let b = [10, 20, 30, 40, 50][this.getRandomInt(0, 4)]; 
+                        return {b, r, c:Math.round(b*r)}; 
+                    }, lessThanOne: true },
+                    { id: 'e', t1: (b,c)=>`定員 <span class="math-text">${b}</span>人のイベントに <span class="math-text">${c}</span>人の申し込みがありました。定員をもとにした申し込み人数の割合を求めましょう。`, t2: (b,r)=>`定員 <span class="math-text">${b}</span>人のイベントに、定員の <span class="math-text">${r}</span>倍の申し込みがありました。何人申し込みましたか。`, t3: (c,r)=>`イベントに <span class="math-text">${c}</span>人の申し込みがありました。これは定員の <span class="math-text">${r}</span>倍です。定員は何人ですか。`, ul: "人", bl: "定員", cl: "申し込み", gen: (r) => { let b = [50, 100, 200, 400][this.getRandomInt(0, 3)]; return {b, r, c:Math.round(b*r)}; } },
+                    { id: 'h', t1: (b,c)=>`弟の身長は <span class="math-text">${b}</span>cm, 兄の身長は <span class="math-text">${c}</span>cmです。弟の身長をもとにした兄の身長の割合を求めましょう。`, t2: (b,r)=>`弟の身長は <span class="math-text">${b}</span>cmです。兄の身長は弟の <span class="math-text">${r}</span>倍です。兄は何cmですか。`, t3: (c,r)=>`兄の身長は <span class="math-text">${c}</span>cmです。これは弟の身長の <span class="math-text">${r}</span>倍です。弟は何cmですか。`, ul: "cm", bl: "弟", cl: "兄", gen: (r) => { 
+                        let safeR = (r <= 1.0) ? 1.2 : r;
+                        let b = [130, 140, 150, 160][this.getRandomInt(0, 3)]; 
+                        return {b, r:safeR, c:Math.round(b*safeR)}; 
+                    } },
+                    { id: 'p', t1: (b,c)=>`A市の人口は <span class="math-text">${b}</span>人, B市の人口は <span class="math-text">${c}</span>人です。A市の人口をもとにしたB市の人口の割合を求めましょう。`, t2: (b,r)=>`A市の人口は <span class="math-text">${b}</span>人です。B市の人口はA市の <span class="math-text">${r}</span>倍です。B市は何人ですか。`, t3: (c,r)=>`B市の人口は <span class="math-text">${c}</span>人です。これはA市の人口の <span class="math-text">${r}</span>倍です。A市は何人ですか。`, ul: "人", bl: "A市", cl: "B市", gen: (r) => { let b = [20000, 40000, 50000][this.getRandomInt(0, 2)]; return {b, r, c:Math.round(b*r)}; } },
+                    { id: 'w', t1: (b,c)=>`水そうに <span class="math-text">${b}</span>Lの水が入ります。今は <span class="math-text">${c}</span>L入っています。全体の量に対する割合を求めましょう。`, t2: (b,r)=>`水そうに <span class="math-text">${b}</span>Lの水が入ります。今は全体の <span class="math-text">${r}</span>倍入っています。何Lですか。`, t3: (c,r)=>`水そうに <span class="math-text">${c}</span>Lの水が入っています。これは全体の <span class="math-text">${r}</span>倍です。全体は何L入りますか。`, ul: "L", bl: "全体", cl: "今", gen: (r) => { let b = [20, 40, 50, 100][this.getRandomInt(0, 3)]; return {b, r, c:Math.round(b*r)}; }, lessThanOne: true }
+                ];
+
+                scenarios.forEach(sc => {
+                    ratioList.forEach(r => {
+                        if (sc.lessThanOne && r >= 1.0) return;
+                        if (sc.id === 'h' && r <= 1.0) return;
+                        // 修正：身長の場合、倍率が1.25を超えると大きすぎるので除外 (例: 160*1.4=224cm)
+                        if (sc.id === 'h' && r > 1.25) return; 
+
+                        const v = sc.gen(r);
+                        if (type === "ratio_p1") pool.push({ text: sc.t1(v.b, v.c), answer: v.r, ul: "倍", base: v.b, compare: v.c, ratio: v.r, a: v.r, bl: sc.bl, cl: sc.cl, hideRatio: true, scenarioId: sc.id });
+                        else if (type === "ratio_p2") pool.push({ text: sc.t2(v.b, v.r), answer: v.c, ul: sc.ul, base: v.b, compare: v.c, ratio: v.r, a: v.c, bl: sc.bl, cl: sc.cl, hideComp: true, scenarioId: sc.id });
+                        else if (type === "ratio_p3") pool.push({ text: sc.t3(v.c, v.r), answer: v.b, ul: sc.ul, base: v.b, compare: v.c, ratio: v.r, a: v.b, bl: sc.bl, cl: sc.cl, hideBase: true, scenarioId: sc.id });
+                    });
+                });
+
+                if (["ratio_p4", "ratio_p5"].includes(type)) {
+                    ratioList.forEach(r => {
+                        const per = Math.round(r * 100);
+                        if (type === "ratio_p4") {
+                            if (r < 1.0) {
+                                const total = [50, 100, 200, 400][this.getRandomInt(0, 3)], part = total * r;
+                                pool.push({ text: `5年生は <span class="math-text">${total}</span>人です。そのうちサッカークラブは <span class="math-text">${part}</span>人です。全体の人数をもとにした割合は何％ですか。`, answer: per, unitLabel: "%", diagramParams: { type: 'tape', base: total, compare: part, label1: "全体", label2: "クラブ", unitLabel: "人" }, scenarioId: 'soccer' });
+                            }
+                        } else {
+                            const price = [1000, 2000, 3000][this.getRandomInt(0, 2)];
+                            if (r < 1.0) pool.push({ text: `<span class="math-text">${price}</span>円の品物を、定価の<span class="math-text">${Math.round((1-r)*100)}</span>％引きで買いました。代金はいくらですか。`, answer: Math.round(price * r), unitLabel: "円", diagramParams: { type: 'tape', base: price, compare: null, label1: "定価", label2: "代金", unitLabel: "円", ratio: r }, scenarioId: 'sd_' + r });
+                        }
+                    });
+                }
+                return pool;
+            }
+
+            get6thGradeRatioValuePool() {
+                let pool = [];
+                const gcd = (x, y) => !y ? x : gcd(y, x % y);
+                
+                for(let i=0; i<35; i++) {
+                    const pt = i % 3;
+                    
+                    // 1. Integer : Integer
+                    if (pt === 0) {
+                        let a = this.getRandomInt(1, 9);
+                        let b = this.getRandomInt(1, 9);
+                        while(a === b) { b = this.getRandomInt(1, 9); }
+                        
+                        let d0 = gcd(a, b);
+                        a /= d0;
+                        b /= d0;
+                        
+                        let maxM = Math.floor(81 / Math.max(a, b));
+                        let m = this.getRandomInt(2, maxM); 
+                        
+                        let val1 = a * m; 
+                        let val2 = b * m;
+                        
+                        pool.push({ 
+                            html: `<div class="flex items-center text-xl justify-start w-full text-left ml-4"><span class="math-text text-2xl">${val1} : ${val2}</span><span class="mx-4">→</span><div class="inline-flex flex-col items-center"><div class="input-wrapper"><input type="text" class="box" style="width:3.2rem;height:1.8rem" data-ans="${a}"><div class="mark-correct"></div></div><div class="w-full border-t-2 border-gray-800 my-1"></div><div class="input-wrapper"><input type="text" class="box" style="width:3.2rem;height:1.8rem" data-ans="${b}"><div class="mark-correct"></div></div></div></div>` 
+                        });
+
+                    } 
+                    // 2. Decimal : Decimal
+                    else if (pt === 1) {
+                         let i1 = this.getRandomInt(2, 15), i2 = this.getRandomInt(2, 15); 
+                         if (i1 === i2) i2++;
+                         let d = gcd(i1, i2);
+                         // answer i1/i2
+                         pool.push({ 
+                            html: `<div class="flex items-center text-xl justify-start w-full text-left ml-4"><span class="math-text text-2xl">${(i1/10).toFixed(1)} : ${(i2/10).toFixed(1)}</span><span class="mx-4">→</span><div class="inline-flex flex-col items-center"><div class="input-wrapper"><input type="text" class="box" style="width:3.2rem;height:1.8rem" data-ans="${i1/d}"><div class="mark-correct"></div></div><div class="w-full border-t-2 border-gray-800 my-1"></div><div class="input-wrapper"><input type="text" class="box" style="width:3.2rem;height:1.8rem" data-ans="${i2/d}"><div class="mark-correct"></div></div></div></div>` 
+                         });
+                    } 
+                    // 3. Fraction : Fraction (Target)
+                    else {
+                        let n1, d1, n2, d2;
+                        let valid = false;
+                        let attempts = 0;
+                        while(!valid && attempts < 100) {
+                            attempts++;
+                            d1 = this.getRandomInt(2, 9);
+                            d2 = this.getRandomInt(2, 9);
+                            
+                            // Rule: Different denominators
+                            if (d1 === d2) continue;
+                            
+                            n1 = this.getRandomInt(1, 9);
+                            // Rule: Irreducible and not 1 (n != d)
+                            if (n1 === d1 || gcd(n1, d1) !== 1) continue;
+                            
+                            n2 = this.getRandomInt(1, 9);
+                            if (n2 === d2 || gcd(n2, d2) !== 1) continue;
+                            
+                            // Rule: Ratio != 1 (fractions not equal)
+                            // n1/d1 == n2/d2  => n1*d2 == n2*d1
+                            if (n1 * d2 === n2 * d1) continue;
+                            
+                            valid = true;
+                        }
+                        
+                        // Calculate Ratio Value: (n1/d1) / (n2/d2) = (n1*d2) / (d1*n2)
+                        let ansN = n1 * d2;
+                        let ansD = d1 * n2;
+                        let ansGCD = gcd(ansN, ansD);
+                        ansN /= ansGCD;
+                        ansD /= ansGCD;
+                        
+                        const f1 = `<span class="fraction"><span class="numerator">${n1}</span><span class="denominator">${d1}</span></span>`;
+                        const f2 = `<span class="fraction"><span class="numerator">${n2}</span><span class="denominator">${d2}</span></span>`;
+                        
+                        pool.push({ 
+                            html: `<div class="flex items-center text-xl justify-start w-full text-left ml-4"><span class="math-text text-2xl flex items-center gap-1">${f1} : ${f2}</span><span class="mx-4">→</span><div class="inline-flex flex-col items-center"><div class="input-wrapper"><input type="text" class="box" style="width:3.2rem;height:1.8rem" data-ans="${ansN}"><div class="mark-correct"></div></div><div class="w-full border-t-2 border-gray-800 my-1"></div><div class="input-wrapper"><input type="text" class="box" style="width:3.2rem;height:1.8rem" data-ans="${ansD}"><div class="mark-correct"></div></div></div></div>` 
+                        });
+                    }
+                }
+                return pool.sort(() => Math.random() - 0.5);
+            }
+
+            get6thGradeSimplifyRatioPool() {
+                let pool = [];
+                const gcd = (x, y) => !y ? x : gcd(y, x % y);
+                const wrapper = (content) => `<div class="flex flex-row items-center w-full text-left ml-4 text-lg whitespace-nowrap overflow-x-hidden">${content}</div>`;
+
+                // 1. Integer : Integer (Standard & Large) - Total 5
+                for(let i=0; i<5; i++) {
+                    let a, b, q1, q2;
+                    // First 3 are standard, last 2 are large
+                    if (i < 3) {
+                        a = this.getRandomInt(1, 9);
+                        b = this.getRandomInt(1, 9);
+                        while(gcd(a, b) === 1 || a === b) { // Require simplification
+                             a = this.getRandomInt(2, 9);
+                             b = this.getRandomInt(2, 9);
+                        }
+                        // Simplify a,b to get answer
+                        let d = gcd(a, b);
+                        let ansA = a / d;
+                        let ansB = b / d;
+                        
+                        // Re-logic:
+                        ansA = this.getRandomInt(1, 9);
+                        ansB = this.getRandomInt(1, 9);
+                        while(ansA === ansB || gcd(ansA, ansB) !== 1) {
+                            ansA = this.getRandomInt(1, 9);
+                            ansB = this.getRandomInt(1, 9);
+                        }
+                        let m = this.getRandomInt(2, 9); // Multiplier
+                        q1 = ansA * m;
+                        q2 = ansB * m;
+                        
+                        pool.push({ html: wrapper(`<span class="math-text text-2xl mr-2">${q1} : ${q2}</span> ＝ <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${ansA}"><div class="mark-correct"></div></div> : <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${ansB}"><div class="mark-correct"></div></div>`) });
+
+                    } else {
+                        // Large numbers (e.g. 72:54)
+                        // Use larger multipliers
+                        let ansA = this.getRandomInt(1, 9);
+                        let ansB = this.getRandomInt(1, 9);
+                        while(ansA === ansB || gcd(ansA, ansB) !== 1) {
+                            ansA = this.getRandomInt(1, 9);
+                            ansB = this.getRandomInt(1, 9);
+                        }
+                        // Multiplier 6 to 15, ensuring result < 100
+                        let m = this.getRandomInt(6, 12); 
+                        q1 = ansA * m;
+                        q2 = ansB * m;
+                        // Ensure they look "large" (at least one > 30) and not too easy (like 20:30)
+                        while (q1 < 20 && q2 < 20) {
+                             m = this.getRandomInt(6, 15);
+                             q1 = ansA * m; q2 = ansB * m;
+                        }
+                         pool.push({ html: wrapper(`<span class="math-text text-2xl mr-2">${q1} : ${q2}</span> ＝ <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${ansA}"><div class="mark-correct"></div></div> : <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${ansB}"><div class="mark-correct"></div></div>`) });
+                    }
+                }
+
+                // 2. Decimal (Unchanged)
+                for(let i=0; i<5; i++) {
+                    let a = this.getRandomInt(1, 9), b = this.getRandomInt(1, 9);
+                    if(gcd(a,b) > 1) { let d=gcd(a,b); a/=d; b/=d; }
+                    if (a === b) b++;
+                    let m = this.getRandomInt(2, 5);
+                    let v1 = (a*m/10).toFixed(1).replace('.0','');
+                    let v2 = (b*m/10).toFixed(1).replace('.0','');
+                    if(!v1.includes('.') && !v2.includes('.')) v1 = (a*m/10).toFixed(1);
+                    pool.push({ html: wrapper(`<span class="math-text text-2xl mr-2">${v1} : ${v2}</span> ＝ <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${a}"><div class="mark-correct"></div></div> : <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${b}"><div class="mark-correct"></div></div>`) });
+                }
+
+                // 3. Fraction : Fraction (Constraint: Different denominators)
+                for(let i=0; i<5; i++) {
+                    let a, b, da, db, ra, rb;
+                    do {
+                        a = this.getRandomInt(1, 5); b = this.getRandomInt(1, 5);
+                        da = this.getRandomInt(2, 9); db = this.getRandomInt(2, 9); // Expanded range slightly
+                        
+                        // Reduce source fractions first to avoid 2/4 vs 1/2 issues effectively being same denominator logic?
+                        // Actually, just checking da !== db is usually enough, but let's be safe.
+                        // The prompt says "Same denominator questions are not allowed".
+                        
+                        // Calculate simplest ratio
+                        let g1 = gcd(a, da); a/=g1; da/=g1;
+                        let g2 = gcd(b, db); b/=g2; db/=g2;
+                        
+                        ra = a * db; rb = b * da;
+                        let d = gcd(ra, rb); ra /= d; rb /= d;
+                    } while (da === 1 || db === 1 || ra === rb || da === db); // Added da === db
+
+                    const f1 = `<span class="fraction"><span class="numerator">${a}</span><span class="denominator">${da}</span></span>`;
+                    const f2 = `<span class="fraction"><span class="numerator">${b}</span><span class="denominator">${db}</span></span>`;
+                    pool.push({ html: wrapper(`<span class="math-text text-2xl flex items-center gap-1 mr-2">${f1} : ${f2}</span> ＝ <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${ra}"><div class="mark-correct"></div></div> : <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${rb}"><div class="mark-correct"></div></div>`) });
+                }
+
+                // 4. Fraction : Integer (Constraint: Integer != 1)
+                for(let i=0; i<5; i++) {
+                    let a, da, b, ra, rb;
+                    do {
+                        a = this.getRandomInt(1, 5); da = this.getRandomInt(2, 6);
+                        let g1 = gcd(a, da); a/=g1; da/=g1;
+                        b = this.getRandomInt(2, 6); // Changed from (1,5) to (2,6) to prevent 1
+                        
+                        ra = a; rb = b * da;
+                        let d = gcd(ra, rb); ra /= d; rb /= d;
+                    } while (da === 1 || ra === rb);
+
+                    const f1 = `<span class="fraction"><span class="numerator">${a}</span><span class="denominator">${da}</span></span>`;
+                    pool.push({ html: wrapper(`<span class="math-text text-2xl flex items-center gap-1 mr-2">${f1} : ${b}</span> ＝ <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${ra}"><div class="mark-correct"></div></div> : <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${rb}"><div class="mark-correct"></div></div>`) });
+                }
+                return pool.sort(() => Math.random() - 0.5);
+            }
+
+            get6thGradeProportionalDistPool() {
+                let pool = [];
+                const gcd = (x, y) => !y ? x : gcd(y, x % y);
+                for(let i=0; i<35; i++) {
+                    const u = ["g", "cm", "円"][i%3];
+                    let r1 = this.getRandomInt(1, 5), r2 = this.getRandomInt(1, 5); if (r1 === r2) r2++;
+                    let d = gcd(r1, r2); r1 /= d; r2 /= d;
+                    let k = (u === "円") ? this.getRandomInt(5, 20) * 10 : this.getRandomInt(5, 20);
+                    pool.push({ html: `<div class="w-full text-left ml-4 text-xl"><div class="mb-2"><span class="math-text text-2xl">${(r1+r2)*k}${u}</span>を <span class="math-text text-2xl">${r1} : ${r2}</span> に分けると</div><div><div class="input-wrapper"><input type="text" class="box w-20" data-ans="${r1*k}"><div class="mark-correct"></div></div>${u} と <div class="input-wrapper"><input type="text" class="box w-20" data-ans="${r2*k}"><div class="mark-correct"></div></div>${u}</div></div>` });
+                }
+                return pool.sort(() => Math.random() - 0.5);
+            }
+
+            get6thGradeProportionalDistWordPool() {
+                let pool = [];
+                const gcd = (x, y) => !y ? x : gcd(y, x % y);
+                const items = [{ n: "紙", u: "枚" }, { n: "リボン", u: "cm" }, { n: "ジュース", u: "mL" }];
+                for(let i=0; i<20; i++) {
+                    const item = items[i % items.length];
+                    let r1 = this.getRandomInt(2, 5), r2 = this.getRandomInt(2, 5); if(r1 === r2) r2++;
+                    let d = gcd(r1, r2); r1 /= d; r2 /= d;
+                    let k = this.getRandomInt(5, 15);
+                    pool.push({ html: `<div class="w-full text-left ml-2"><div class="mb-2 text-lg"><span class="math-text text-xl">${(r1+r2)*k}</span>${item.u}の${item.n}を、<span class="math-text text-xl">${r1} : ${r2}</span> の割合で分けます。それぞれ何${item.u}になりますか。</div><div class="flex items-center justify-end text-lg"><div class="input-wrapper"><input type="text" class="box w-20" data-ans="${r1*k}"><div class="mark-correct"></div></div>${item.u} と <div class="input-wrapper"><input type="text" class="box w-20" data-ans="${r2*k}"><div class="mark-correct"></div></div>${item.u}</div></div>` });
+                }
+                return pool.sort(() => Math.random() - 0.5);
+            }
+
+            get6thGradeScaleMapPool() {
+                let pool = [];
+                for(let i=0; i<20; i++) {
+                    const pt = i % 4;
+                    if (pt === 0) {
+                        const sc = 25000, mCm = this.getRandomInt(2, 8);
+                        pool.push({ html: `<div class="w-full text-left ml-4 text-lg">縮尺 1 : ${sc} の地図で <span class="math-text text-xl">${mCm}</span>cm の距離は、実際には何kmですか。</div><div class="flex items-center justify-end text-lg">答え <div class="input-wrapper"><input type="text" class="box w-24" data-ans="${(mCm*sc)/100000}"><div class="mark-correct"></div></div>km</div></div>` });
+                    } else if (pt === 1) {
+                        const shadow = [{ s: 80, t: 6, a: 7.5 }, { s: 50, t: 4, a: 8 }][this.getRandomInt(0, 1)];
+                        pool.push({ html: `<div class="w-full text-left ml-4 text-lg">長さ <span class="math-text text-xl">1</span>m の棒の影が <span class="math-text text-xl">${shadow.s}</span>cm の時、木の影が <span class="math-text text-xl">${shadow.t}</span>m でした。木の高さは何mですか。</div><div class="flex items-center justify-end text-lg">答え <div class="input-wrapper"><input type="text" class="box w-24" data-ans="${shadow.a}"><div class="mark-correct"></div></div>m</div></div>` });
+                    } else if (pt === 2) {
+                        const bw = this.getRandomInt(3, 6), bh = this.getRandomInt(2, 5), r = 2;
+                        pool.push({ html: `<div class="w-full text-left ml-4 text-lg">横 <span class="math-text text-xl">${bw}</span>cm、縦 <span class="math-text text-xl">${bh}</span>cm の長方形を拡大して、横を <span class="math-text text-xl">${bw*r}</span>cm にしました。縦は何cmになりますか。</div><div class="flex items-center justify-end text-lg">答え <div class="input-wrapper"><input type="text" class="box w-24" data-ans="${bh*r}"><div class="mark-correct"></div></div>cm</div></div>` });
+                    } else {
+                        const den = 10000, mCm = 5, total = (den * mCm) / 100;
+                        pool.push({ html: `<div class="w-full text-left ml-4 text-lg">実際の長さが <span class="math-text text-xl">${total}</span>m の道路を地図で <span class="math-text text-xl">${mCm}</span>cm で表します。縮尺は 1 : ▢ です。</div><div class="flex items-center justify-end text-lg">答え <div class="input-wrapper"><input type="text" class="box w-28" data-ans="${den}"><div class="mark-correct"></div></div></div></div>` });
+                    }
+                }
+                return pool.sort(() => Math.random() - 0.5);
+            }
+
+            generateProblems() {
+                this.currentProblems = [];
+                const config = this.CONFIG[this.currentGrade][this.currentMode];
+                this.shuffledPool = []; 
+
+                if (config.type === "kakezan_basic") {
+                    this.shuffledPool = this.getKakezanPool();
+                } else if (config.type.startsWith("bai_times") || config.type.startsWith("length_volume_bai")) {
+                    this.shuffledPool = this.getGrade2Pool(config.type);
+                } else if (config.type.startsWith("fraction_part")) {
+                    this.shuffledPool = this.getFractionPartPool(config.type);
+                } else if (config.type.startsWith("bai_calc")) {
+                    this.shuffledPool = this.getGrade3BaiCalcPool(config.type);
+                } else if (config.type === "bai_word") {
+                    this.shuffledPool = this.getGrade3WordPool();
+                } else if (config.type === "decimal_div_word") {
+                    this.shuffledPool = this.get4thGradeDecimalDivWordPool();
+                } else if (config.type.startsWith("find_bai_")) {
+                    this.shuffledPool = this.getFindBaiPool(config.type);
+                } else if (config.type === "bai_mikata_random" || config.type === "bai_mikata_decimal") {
+                    this.shuffledPool = this.get4thGradeMikataPool(config.type);
+                } else if (config.type === "ratio_p4") {
+                    this.shuffledPool = this.get5thGradePercentPool();
+                } else if (config.type === "ratio_p5") {
+                    this.shuffledPool = this.get5thGradeDiscountPool();
+                } else if (config.type.startsWith("ratio_p")) {
+                    this.shuffledPool = this.get5thGradePool(config.type);
+                } else if (config.type === "proportional_dist_word") {
+                    this.shuffledPool = this.get6thGradeProportionalDistWordPool();
+                } else if (config.type === "scale_map") {
+                    this.shuffledPool = this.get6thGradeScaleMapPool();
+                } else if (config.type === "simplify_ratio") {
+                    this.shuffledPool = this.get6thGradeSimplifyRatioPool();
+                } else if (config.type === "ratio_value") {
+                    this.shuffledPool = this.get6thGradeRatioValuePool();
+                } else if (config.type === "proportional_dist") {
+                    this.shuffledPool = this.get6thGradeProportionalDistPool();
+                }
+
+                if (!this.shuffledPool || this.shuffledPool.length === 0) {
+                     console.warn("Problem pool is empty. Please ensure all get...Pool methods are implemented.");
+                     return;
+                }
+
+                const poolSize = this.shuffledPool.length;
+                if (poolSize > 0) {
+                     this.shuffledPool.sort(() => Math.random() - 0.5);
+                     const history = new Set();
+                     for(let i=0; i < config.count; i++) {
+                        let q = this.shuffledPool[i % poolSize];
+                        if ((config.type.startsWith('ratio_p') || config.type.includes('mikata') || config.type === 'decimal_div_word') && q.scenarioId) {
+                             if (history.has(q.scenarioId)) {
+                                 const next = this.shuffledPool.find(p => !history.has(p.scenarioId));
+                                 if (next) q = next;
+                             }
+                             history.add(q.scenarioId);
+                        }
+                        this.currentProblems.push(this.formatProblem(config.type, q));
+                     }
+                } else {
+                    for(let i=0; i < config.count; i++) {
+                        this.currentProblems.push(this.formatProblem(config.type, null));
+                    }
+                }
+                
+                this.renderProblems(this.currentProblems, document.getElementById('problems-container'), config.count, config.type);
+            }
+
+             formatProblem(type, q) {
+                let template = "", a = 0, diagramParams = null;
+                if(!q && !type.startsWith('kakezan') && !type.startsWith('fraction')) return { template: "", answer: 0, diagramParams: null };
+
+                if (q && q.html) { template = q.html; a = null; } 
+                else if (q.text) {
+                    a = q.a || q.answer;
+                    const textDisp = q.textFull || q.text;
+                    const inputHtml = `<div class="input-wrapper"><input type="text" class="box" data-ans="${a}"><div class="mark-correct"></div></div>`;
+                    
+                    if (type.startsWith("bai_times") || type.startsWith("length_volume_bai") || type.startsWith("bai_calc")) {
+                        template = `<div class="flex flex-col w-full text-left"><div class="whitespace-nowrap">${textDisp.split('は何')[0]}</div><div class="flex justify-end items-center mt-1">答え：${inputHtml}${q.unit || q.ul || ""}</div></div>`;
+                    } else {
+                        template = `<div class="w-full text-left">${textDisp}</div><div class="w-full text-right">答え：${inputHtml}${q.ul || q.unitLabel || q.unit || "" }</div>`;
+                    }
+                    if (type === "bai_word") diagramParams = null;
+                    else {
+                        if (q.diagramParams) {
+                            diagramParams = q.diagramParams;
+                        } else {
+                            let b = q.base, c = q.compare, r = q.ratio;
+                            if (q.base === a) b = null; 
+                            else if (q.compare === a) c = null; 
+                            else if (q.ratio === a) r = null;
+                            diagramParams = { type: 'tape', base: b, compare: c, ratio: r, label1: q.bl || "もと", label2: q.cl || "くらべる", unitLabel: q.ul === "倍" || q.ul === "%" ? "" : (q.ul || q.unitLabel || q.unit), baseIsTop: true };
+                        }
+                    }
+                } else if (type === "kakezan_basic") {
+                    let n1 = this.getRandomInt(2, 9), n2 = this.getRandomInt(1, 9); a = n1 * n2;
+                    template = `<div class="flex items-center text-xl justify-start w-full text-left pl-4"><span class="math-text text-2xl">${n1}</span> <span class="math-text text-2xl">×</span> <span class="math-text text-2xl">${n2}</span> <span class="math-text text-2xl">＝</span> <div class="input-wrapper"><input type="text" class="box" data-ans="${a}"><div class="mark-correct"></div></div></div>`;
+                } else if (type.startsWith("fraction_part")) {
+                    const d = type.endsWith("1") ? this.getRandomInt(2, 5) : this.getRandomInt(6, 9), v = this.getRandomInt(1, 5) * d; a = v / d;
+                    template = `<div class="flex items-center text-xl justify-start w-full text-left pl-4"><span class="math-text text-2xl">${v}</span>この <span class="fraction ml-2"><span class="numerator text-xl">${1}</span><span class="denominator text-xl">${d}</span></span>は <div class="input-wrapper ml-2"><input type="text" class="box" data-ans="${a}"><div class="mark-correct"></div></div>こ</div>`; 
+                }
+                return { template, answer: a, diagramParams };
+             }
+             
+             createTapeDiagram(p) {
+                const w = 500, h = 160, pl = 100, bh = 25, sp = 35;
+                let dB = p.base, dC = p.compare, dR = p.ratio;
+                
+                if (dB === null && dC !== null && dR) dB = dC / dR; 
+                else if (dC === null && dB !== null && dR) dC = dB * dR;
+                else if (dR === null && dB !== null && dC !== null) dR = dC / dB;
+
+                const sMax = Math.max(dB||1, dC||1) * 1.25;
+                const bw = (dB / (sMax||1)) * 350;
+                const cw = (dC / (sMax||1)) * 350;
+                const ay = 110;
+                
+                let svg = `<svg width="100%" height="100%" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">`;
+                
+                svg += `<text x="${pl-8}" y="28" text-anchor="end" font-size="12" font-weight="900" fill="#4b5563">${p.label1}</text>`;
+                svg += `<rect x="${pl}" y="10" width="${bw}" height="${bh}" fill="#e0e7ff" stroke="#1d4ed8" stroke-width="2" rx="4" />`;
+                svg += `<text x="${pl+bw/2}" y="28" text-anchor="middle" font-size="12" font-weight="bold">${p.base===null ? "□" : p.base}${p.unitLabel||""}</text>`;
+                
+                svg += `<text x="${pl-8}" y="81" text-anchor="end" font-size="12" font-weight="900" fill="#4b5563">${p.label2}</text>`;
+                svg += `<rect x="${pl}" y="63" width="${cw}" height="${bh}" fill="#fef2f2" stroke="#ef4444" stroke-width="2" rx="4" />`;
+                svg += `<text x="${pl+cw/2}" y="81" text-anchor="middle" font-size="12" font-weight="bold">${p.compare===null ? "□" : p.compare}${p.unitLabel||""}</text>`;
+                
+                svg += `<line x1="${pl}" y1="${ay}" x2="${pl+360}" y2="${ay}" stroke="#1f2937" stroke-width="2" />`;
+                svg += `<text x="${pl}" y="${ay+20}" text-anchor="middle" font-size="12" font-weight="bold">0</text>`;
+                
+                svg += `<line x1="${pl+bw}" y1="${10+bh}" x2="${pl+bw}" y2="${ay+5}" stroke="#94a3b8" stroke-dasharray="4" />`;
+                svg += `<text x="${pl+bw}" y="${ay+20}" text-anchor="middle" font-size="12" font-weight="900">1</text>`;
+                
+                svg += `<line x1="${pl+cw}" y1="${63+bh}" x2="${pl+cw}" y2="${ay+5}" stroke="#94a3b8" stroke-dasharray="4" />`;
+                
+                let rText = "";
+                if (p.ratio === null) {
+                    rText = "□";
+                } else {
+                    rText = (p.ratio % 1 === 0 ? p.ratio : p.ratio.toFixed(1));
+                }
+                svg += `<text x="${pl+cw}" y="${ay+22}" text-anchor="middle" font-size="12" font-weight="900" fill="#ef4444">${rText}</text>`;
+                
+                return svg + `</svg>`;
+             }
+
+            renderProblems(problems, container, count, type) {
+                container.innerHTML = '';
+                container.className = 'problems-container ' + (count >= 10 ? 'layout-2col' : '');
+                const lrg = ['kakezan_basic', 'ratio_value', 'fraction_part_1', 'fraction_part_2', 'bai_times_1', 'bai_times_2', 'length_volume_bai_1', 'length_volume_bai_2', 'bai_calc_1', 'bai_calc_2', 'find_bai_4patterns', 'find_bai_decimal_4patterns', 'simplify_ratio', 'proportional_dist'];
+                problems.forEach((p, i) => {
+                    let body = p.template; 
+                    if (count === 5 || count === 10) {
+                        let diag = p.diagramParams ? this.createTapeDiagram(p.diagramParams) : "";
+                        if (p.diagramParams) {
+                             container.innerHTML += `<div class="problem-item visual-problem"><div class="flex w-full mb-1"><div class="problem-number">(${i+1})</div><div class="problem-body">${body}</div></div><div class="problem-visual-row"><div class="diagram-area">${diag}<canvas class="drawing-canvas"></canvas><button class="btn-clear" onclick="window.app.clearCanvas(this)">×</button></div><div class="memo-area"><span class="memo-label">計算メモ</span><canvas class="drawing-canvas"></canvas><button class="btn-clear" onclick="window.app.clearCanvas(this)">×</button></div></div></div>`;
+                        } else {
+                             container.innerHTML += `<div class="problem-item visual-problem"><div class="flex w-full mb-1"><div class="problem-number">(${i+1})</div><div class="problem-body">${body}</div></div><div class="problem-visual-row full-memo"><div class="memo-area"><span class="memo-label">計算メモ</span><canvas class="drawing-canvas"></canvas><button class="btn-clear" onclick="window.app.clearCanvas(this)">×</button></div></div></div>`;
+                        }
+                    } else {
+                        let eC = (count === 20) ? ' spacious' : '';
+                        let isHuge = type === 'kakezan_basic' || type.startsWith('fraction_part');
+                        let isLarge = lrg.includes(type);
+                        let bC = isHuge ? ' problem-body huge-text' : (isLarge ? ' problem-body large-text' : ' problem-body');
+                        container.innerHTML += `<div class="problem-item ${eC}"><div class="problem-number">(${i+1})</div><div class="${bC}">${body}</div></div>`;
+                    }
+                });
+                setTimeout(() => this.initCanvases(), 150);
+            }
+
+            initCanvases() {
+                document.querySelectorAll('.drawing-canvas').forEach(canvas => {
+                    const parent = canvas.parentElement; canvas.width = parent.clientWidth; canvas.height = parent.clientHeight;
+                    const ctx = canvas.getContext('2d'); ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.strokeStyle = '#334155';
+                    let drawing = false; const getPos = (e) => { const rect = canvas.getBoundingClientRect(); return { x: (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left, y: (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top }; };
+                    canvas.onmousedown = (e) => { drawing = true; const pos = getPos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); };
+                    canvas.onmousemove = (e) => { if(drawing) { const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); } };
+                    canvas.onmouseup = () => drawing = false; canvas.onmouseleave = () => drawing = false;
+                    canvas.ontouchstart = (e) => { drawing = true; const pos = getPos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); e.preventDefault(); };
+                    canvas.ontouchmove = (e) => { if(drawing) { const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); } e.preventDefault(); };
+                });
+            }
+            clearCanvas(btn) { 
+                const canvas = btn.parentElement.querySelector('canvas'); 
+                if (canvas) { 
+                    const ctx = canvas.getContext('2d'); 
+                    ctx.clearRect(0, 0, canvas.width, canvas.height); 
+                } 
+            }
+
+
+            // --- 答え合わせロジック (Ver.2 改修版) ---
+            checkAnswers() {
+                let correctCount = 0;
+                const wrappers = document.querySelectorAll('.input-wrapper');
+                
+                // 既存の正解表示をリセット
+                document.querySelectorAll('.correction-text').forEach(el => el.remove());
+
+                wrappers.forEach(wrapper => {
+                    const input = wrapper.querySelector('input.box');
+                    if (!input) return;
+                    
+                    const v = input.value.trim().replace(/[！-～]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
+                    const ansData = input.dataset.ans; 
+                    
+                    if (!ansData || v === "") {
+                        wrapper.classList.remove('correct', 'incorrect');
+                        return;
+                    }
+
+                    // 数値として比較（誤差許容）
+                    let isCorrect = Math.abs(parseFloat(ansData) - parseFloat(v)) < 0.001;
+                    
+                    if (isCorrect) { 
+                        wrapper.classList.add('correct'); 
+                        wrapper.classList.remove('incorrect'); 
+                        correctCount++; 
+                    } else { 
+                        wrapper.classList.add('incorrect'); 
+                        wrapper.classList.remove('correct'); 
+                        
+                        const correction = document.createElement('span');
+                        correction.className = 'correction-text';
+                        correction.textContent = ansData;
+                        wrapper.parentNode.insertBefore(correction, wrapper.nextSibling);
+                    }
+                });
+
+                const score = wrappers.length > 0 ? Math.round((correctCount / wrappers.length) * 100) : 0;
+                
+                // スコア表示
+                document.getElementById('score-display').textContent = score;
+                document.getElementById('modal-score').textContent = score + "点";
+                document.getElementById('modal-message').textContent = score === 100 ? "すばらしい！かんぺきです！" : "おしい！あかい数字を見て復習しよう！";
+                
+                this.modal.classList.add('show');
+                
+                if (score === 100) {
+                    this.startConfetti();
+                    this.playFanfare();
+                }
+
+                // ★Ver.2追加: 進捗の保存
+                this.saveProgress(this.currentGrade, this.currentMode, score);
+            }
+
+            closeModal() { this.modal.classList.remove('show'); this.stopConfetti(); }
+
+            startConfetti() {
+                this.particles = [];
+                for(let i=0; i<200; i++) {
+                    this.particles.push({
+                        x: Math.random() * this.canvas.width, y: -10,
+                        size: Math.random() * 8 + 4, speed: Math.random() * 5 + 3,
+                        color: `hsl(${Math.random()*360}, 80%, 60%)`, angle: Math.random() * 6.28
+                    });
+                }
+                const animate = () => {
+                    this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+                    this.particles.forEach(p => {
+                        p.y += p.speed; p.x += Math.sin(p.angle) * 2;
+                        if(p.y > this.canvas.height) p.y = -10;
+                        this.ctx.fillStyle = p.color; this.ctx.fillRect(p.x, p.y, p.size, p.size);
+                    });
+                    this.animationId = requestAnimationFrame(animate);
+                };
+                animate();
+            }
+
+            stopConfetti() {
+                if(this.animationId) cancelAnimationFrame(this.animationId);
+                if(this.ctx) this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
+            }
+
+            printSheets() {
+                const area = document.getElementById('print-area'); area.innerHTML = '';
+                const create = (ans) => {
+                    const sheet = document.getElementById('active-sheet').cloneNode(true);
+                    if(ans) sheet.querySelectorAll('input.box').forEach(i => i.value = i.dataset.ans || '');
+                    // 印刷用シートからはcanvasやボタンを削除
+                    sheet.querySelectorAll('.drawing-canvas, .btn-clear, .correction-text').forEach(e => e.remove());
+                    area.appendChild(sheet);
+                };
+                create(false); // 問題
+                create(true);  // 解答
+                window.print();
+            }
+        }
+        window.app = new MathApp();
+    </script>
+</body>
+</html>
