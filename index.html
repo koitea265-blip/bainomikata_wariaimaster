@@ -4,12 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>倍の見方・割合マスター</title>
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=BIZ+UDGothic:wght@400;700&family=Zen+Maru+Gothic:wght@500;700;900&display=swap" rel="stylesheet">
-    
     <style>
         /* --- Base Styles --- */
         body {
@@ -144,23 +142,57 @@
         @media print {
             body { background: none; display: block; padding: 0; margin: 0; }
             .screen, .controls, #result-modal, #confetti-canvas { display: none !important; }
-            .sheet { width: 210mm; height: 296mm; page-break-after: always; padding: 10mm 15mm; margin: 0; box-shadow: none; border: none; }
+            .sheet { 
+                width: 210mm; 
+                height: 296mm; 
+                page-break-after: always; 
+                padding: 6mm 10mm; /* A4の限界まで収めるためパディングを微調整 */
+                margin: 0; 
+                box-shadow: none; 
+                border: none; 
+            }
             #print-area { display: block !important; }
             .drawing-canvas, .btn-clear { display: none !important; }
-            .layout-2col .problem-item.spacious { padding-bottom: 1.1rem; }
-            .problem-item.visual-problem { padding-bottom: 0.4rem; margin-bottom: 0.4rem; }
-            .problem-visual-row { height: 105px; }
-            /* 修正: タイトル枠の調整 */
-            .header-title h1 { line-height: 1.2; font-size: 2.4rem !important; margin-bottom: 5px; } 
-            .header-box { display: block !important; height: auto !important; } /* Flex解除して自然な高さに */
-            .header-inputs { margin-bottom: 10px !important; } /* ★追加: 名前欄の下に余白 */
+            
+            /* 行間・間隔の徹底引き締め */
+            .layout-2col .problem-item {
+                padding-top: 0.35rem !important;
+                padding-bottom: 0.35rem !important;
+            }
+            .problem-item.spacious { 
+                padding-top: 0.4rem !important; 
+                padding-bottom: 0.4rem !important; 
+            }
+            .problem-item.visual-problem { 
+                padding-top: 0.15rem !important; 
+                padding-bottom: 0.15rem !important; 
+                margin-bottom: 0.15rem !important; 
+            }
+            .problem-visual-row { 
+                height: 75px !important; /* 全タイプのビジュアル問題を1ページに押し込める設計 */
+                margin-top: 0.15rem !important; 
+            }
+            
+            /* 印刷用ヘッダー枠を限界まで引き締め */
+            .header-row { 
+                min-height: 85px !important; 
+                margin-bottom: 0.6rem !important; 
+            }
+            .header-title h1 { line-height: 1.1; font-size: 1.9rem !important; margin-bottom: 1px; } 
+            .header-box { display: block !important; height: auto !important; padding: 0.4rem 0.8rem !important; } 
+            .header-inputs { margin-bottom: 3px !important; margin-top: 0.15rem !important; font-size: 0.9rem !important; } 
+            .header-input { font-size: 1.0rem !important; height: 1.5rem !important; }
+            .score-container { 
+                width: 120px !important; 
+                padding: 0.4rem 0.8rem !important; 
+            }
+            #score-display { font-size: 2.8rem !important; }
             .mark-correct { display: none !important; }
             .correction-text { display: none !important; }
         }
     </style>
 </head>
 <body>
-
     <!-- Home Screen -->
     <div id="home-screen" class="screen active">
         <h1 class="text-4xl md:text-5xl font-black text-indigo-600 mb-2 tracking-tight">倍の見方・割合マスター</h1>
@@ -252,6 +284,7 @@
 
     <div id="print-area"></div>
     <canvas id="confetti-canvas"></canvas>
+    
     <div id="result-modal">
         <div class="modal-content">
             <h2 class="text-3xl font-black mb-2 text-gray-800">結果は...</h2>
@@ -374,6 +407,7 @@
                 this.currentGrade = grade;
                 this.currentMode = modeIndex;
                 const config = this.CONFIG[grade][modeIndex];
+                
                 document.getElementById('home-screen').classList.remove('active');
                 document.getElementById('drill-screen').classList.add('active');
                 document.getElementById('header-grade-text').textContent = `${grade}年生 算数`;
@@ -395,8 +429,6 @@
                 this.stopConfetti();
                 this.updateHomeBadges();
             }
-
-            // --- Problem Generation Logic ---
 
             playFanfare() {
                 try {
@@ -425,7 +457,6 @@
                     playNote(1046.50, now + 0.75, 1.2); // C6
                     playNote(523.25, now + 0.75, 1.2); // C5
                     playNote(659.25, now + 0.75, 1.2); // E5
-
                 } catch (e) {
                     console.error("Audio play failed", e);
                 }
@@ -466,14 +497,12 @@
                 
                 let pairs = [];
                 if (isBasic) {
-                    // ①: base 2~9, ratio 2~9 (64通り)
                     for(let b=2; b<=9; b++) {
                         for(let r=2; r<=9; r++) {
                             pairs.push({b, r});
                         }
                     }
                 } else {
-                    // ②: base 10~50, ratio 2~6
                     const seen = new Set();
                     while(pairs.length < 30) {
                         let b = this.getRandomInt(10, 50);
@@ -503,7 +532,7 @@
 
             getGrade3WordPool() {
                 return [
-                    { text: "赤いひもは <span class='math-text'>12</span>cm, 青いひもは <span class='math-text'>4</span>cmです。赤いひもは青いひもの何倍ですか。", answer: 3, unit: "倍", base: 4, compare: 12, ratio: 3 },
+                    { text: "赤いひもは <span class='math-text'>12</span>cm, 青いひもは <span class='math-text'>4</span>cmです。赤いひもは青いひものの何倍ですか。", answer: 3, unit: "倍", base: 4, compare: 12, ratio: 3 },
                     { text: "おはじきが <span class='math-text'>15</span>個あります。ビー玉はその <span class='math-text'>5</span>倍あります。ビー玉は何個ですか。", answer: 75, unit: "個", base: 15, ratio: 5 },
                     { text: "クッキーが <span class='math-text'>24</span>個あります。これはチョコの <span class='math-text'>3</span>倍です。チョコは何個ですか。", answer: 8, unit: "個", compare: 24, ratio: 3 },
                     { text: "兄の体重は <span class='math-text'>40</span>kg, 弟は <span class='math-text'>20</span>kgです。兄は弟の何倍ですか。", answer: 2, unit: "倍", base: 20, compare: 40, ratio: 2 },
@@ -516,7 +545,6 @@
 
             getFractionPartPool(type) {
                 let pool = [];
-                // 全パターンを生成して重複を防ぐ (4つの分母 × 1~9倍 = 36通り)
                 const dMin = type.endsWith("1") ? 2 : 6;
                 const dMax = type.endsWith("1") ? 5 : 9;
                 
@@ -547,26 +575,16 @@
                         }
                     }
                 } else {
-                    // Integer case: Base is 3 digits (100-999), Ratio is 2-9
-                    // Constraint 1: Result must be <= 999 (No 4-digit numbers)
-                    // Constraint 2: Base's ones digit must be 0 (e.g. 120, 350)
                     const seen = new Set();
                     let attempts = 0;
                     while(pairs.length < 35 && attempts < 1000) { 
                         attempts++;
                         let t = this.getRandomInt(2, 9);
-                        
-                        // Calculate max base to keep product <= 999
                         let maxB = Math.floor(999 / t);
-                        
-                        // Base must be at least 100 and have ones digit 0.
-                        // So we look for multiples of 10 in range [100, maxB].
-                        // Range for (b/10) is [10, floor(maxB/10)].
                         let minDiv10 = 10;
                         let maxDiv10 = Math.floor(maxB / 10);
 
-                        if (maxDiv10 < minDiv10) continue; // Can't form a 3-digit number
-
+                        if (maxDiv10 < minDiv10) continue; 
                         let val = this.getRandomInt(minDiv10, maxDiv10);
                         let b = val * 10;
                         
@@ -594,7 +612,6 @@
                     else if (p === 1) pool.push({ text: `<span class="math-text">${b}</span>${unit}の <span class="math-text">${t}</span>倍は 何${unit}ですか。`, answer: total, unit: unit, base: b, compare: null, ratio: t }); 
                     else pool.push({ text: `<span class="math-text">${total}</span>${unit}は 何${unit}の <span class="math-text">${t}</span>倍ですか。`, answer: b, unit: unit, base: null, compare: total, ratio: t }); 
                 }
-                
                 return pool;
             }
 
@@ -623,17 +640,16 @@
                 for (let sc of scenarios) {
                     const ratios = type.includes("decimal") ? [1.2, 1.5, 2.4, 2.5, 3.5] : [2, 3, 4, 5, 6];
                     for (let r of ratios) {
-                        for(let k=0; k<1; k++) { 
-                             let b = this.getRandomInt(sc.bMin, sc.bMax);
-                             if (sc.sub === "値段" || sc.sub === "貯金") b = Math.ceil(b / 10) * 10;
-                             
-                             let c = Math.round(b * r * 10) / 10;
-                             
-                             // 修正：重さが80kgを超えないように制限
-                             if (sc.sub === "重さ" && sc.u === "kg" && c > 80) continue;
+                        for(let k=0; k<1; k++) {  
+                            let b = this.getRandomInt(sc.bMin, sc.bMax); 
+                            if (sc.sub === "値段" || sc.sub === "貯金") b = Math.ceil(b / 10) * 10;
+                            
+                            let c = Math.round(b * r * 10) / 10;
+                            
+                            if (sc.sub === "重さ" && sc.u === "kg" && c > 80) continue;
 
-                             pool.push({ 
-                                text: `${sc.l2}の${sc.sub}は <span class="math-text">${c}</span>${sc.u}, ${sc.l1}の${sc.sub}は <span class="math-text">${b}</span>${sc.u} です。${sc.l2}の${sc.sub}は${sc.l1}の${sc.sub}の何倍ですか。`, 
+                            pool.push({
+                                text: `${sc.l2}の${sc.sub}は <span class="math-text">${c}</span>${sc.u}, ${sc.l1}の${sc.sub}は <span class="math-text">${b}</span>${sc.u} です。${sc.l2}の${sc.sub}は${sc.l1}の${sc.sub}の何倍ですか。`,
                                 answer: r, unit: "倍", base: b, compare: c, ratio: null, bl: sc.l1, cl: sc.l2, scenarioId: sc.id,
                                 diagramParams: { type: 'tape', base: b, compare: c, ratio: null, label1: sc.l1, label2: sc.l2, unitLabel: sc.u, baseIsTop: true }
                             });
@@ -669,19 +685,19 @@
                         let found = false;
                         let b, c;
                         
-                        for(let k=0; k<15; k++) {
-                             b = this.getRandomInt(1, 20) * 10; 
-                             if (sc.label === '人数' || sc.label === '定員' || sc.label === '乗車率') b = this.getRandomInt(2, 10) * 10;
-                             if (sc.label === '所持金') b = this.getRandomInt(5, 20) * 100;
-                             if (sc.label === '長さ') b = this.getRandomInt(5, 20); 
-                             if (sc.label === '勝敗') b = this.getRandomInt(10, 30);
-                             
-                             let val = b * r;
-                             if (Math.abs(Math.round(val) - val) < 0.0001) {
-                                 c = Math.round(val);
-                                 found = true;
-                                 break;
-                             }
+                        for(let k=0; k<15; k++) { 
+                            b = this.getRandomInt(1, 20) * 10; 
+                            if (sc.label === '人数' || sc.label === '定員' || sc.label === '乗車率') b = this.getRandomInt(2, 10) * 10;
+                            if (sc.label === '所持金') b = this.getRandomInt(5, 20) * 100;
+                            if (sc.label === '長さ') b = this.getRandomInt(5, 20); 
+                            if (sc.label === '勝敗') b = this.getRandomInt(10, 30);
+                            
+                            let val = b * r;
+                            if (Math.abs(Math.round(val) - val) < 0.0001) {
+                                c = Math.round(val);
+                                found = true;
+                                break;
+                            }
                         }
                         
                         if (found) {
@@ -775,7 +791,6 @@
                     ratioList.forEach(r => {
                         if (sc.lessThanOne && r >= 1.0) return;
                         if (sc.id === 'h' && r <= 1.0) return;
-                        // 修正：身長の場合、倍率が1.25を超えると大きすぎるので除外 (例: 160*1.4=224cm)
                         if (sc.id === 'h' && r > 1.25) return; 
 
                         const v = sc.gen(r);
@@ -784,14 +799,7 @@
                         else if (type === "ratio_p3") pool.push({ text: sc.t3(v.c, v.r), answer: v.b, ul: sc.ul, base: v.b, compare: v.c, ratio: v.r, a: v.b, bl: sc.bl, cl: sc.cl, hideBase: true, scenarioId: sc.id });
                     });
                 });
-
-                if (["ratio_p4", "ratio_p5"].includes(type)) {
-                    // ... (This part was for p4/p5 which are separate now)
-                    // Wait, get5thGradePool in previous version handled p4/p5 logic inside?
-                    // No, generateProblems calls get5thGradePercentPool for ratio_p4 and DiscountPool for ratio_p5.
-                    // So get5thGradePool only needs to handle ratio_p1, p2, p3.
-                }
-                return pool;
+                return pool.sort(() => Math.random() - 0.5);
             }
 
             get6thGradeRatioValuePool() {
@@ -808,32 +816,27 @@
                         while(a === b) { b = this.getRandomInt(1, 9); }
                         
                         let d0 = gcd(a, b);
-                        a /= d0;
-                        b /= d0;
+                        a /= d0; b /= d0;
                         
                         let maxM = Math.floor(81 / Math.max(a, b));
                         let m = this.getRandomInt(2, maxM); 
-                        
                         let val1 = a * m; 
                         let val2 = b * m;
                         
-                        // justify-center -> justify-start
                         pool.push({ 
-                            html: `<div class="flex items-center text-xl justify-start w-full text-left ml-4"><span class="math-text text-2xl">${val1} : ${val2}</span><span class="mx-4">→</span><div class="inline-flex flex-col items-center"><div class="input-wrapper"><input type="text" class="box" style="width:3.2rem;height:1.8rem" data-ans="${a}"><div class="mark-correct"></div></div><div class="w-full border-t-2 border-gray-800 my-1"></div><div class="input-wrapper"><input type="text" class="box" style="width:3.2rem;height:1.8rem" data-ans="${b}"><div class="mark-correct"></div></div></div></div>` 
+                            html: `<div class="flex items-center text-xl justify-start w-full text-left pl-4"><span class="math-text text-2xl">${val1} : ${val2}</span><span class="mx-4">→</span><div class="inline-flex flex-col items-center"><div class="input-wrapper"><input type="text" class="box" style="width:3.2rem;height:1.8rem" data-ans="${a}"><div class="mark-correct"></div></div><div class="w-full border-t-2 border-gray-800 my-1"></div><div class="input-wrapper"><input type="text" class="box" style="width:3.2rem;height:1.8rem" data-ans="${b}"><div class="mark-correct"></div></div></div></div>` 
                         });
-
                     } 
                     // 2. Decimal : Decimal
-                    else if (pt === 1) {
-                         let i1 = this.getRandomInt(2, 15), i2 = this.getRandomInt(2, 15); 
-                         if (i1 === i2) i2++;
-                         let d = gcd(i1, i2);
-                         // answer i1/i2
-                         pool.push({ 
-                            html: `<div class="flex items-center text-xl justify-start w-full text-left ml-4"><span class="math-text text-2xl">${(i1/10).toFixed(1)} : ${(i2/10).toFixed(1)}</span><span class="mx-4">→</span><div class="inline-flex flex-col items-center"><div class="input-wrapper"><input type="text" class="box" style="width:3.2rem;height:1.8rem" data-ans="${i1/d}"><div class="mark-correct"></div></div><div class="w-full border-t-2 border-gray-800 my-1"></div><div class="input-wrapper"><input type="text" class="box" style="width:3.2rem;height:1.8rem" data-ans="${i2/d}"><div class="mark-correct"></div></div></div></div>` 
-                         });
+                    else if (pt === 1) { 
+                        let i1 = this.getRandomInt(2, 15), i2 = this.getRandomInt(2, 15);
+                        if (i1 === i2) i2++;
+                        let d = gcd(i1, i2);
+                        pool.push({ 
+                            html: `<div class="flex items-center text-xl justify-start w-full text-left pl-4"><span class="math-text text-2xl">${(i1/10).toFixed(1)} : ${(i2/10).toFixed(1)}</span><span class="mx-4">→</span><div class="inline-flex flex-col items-center"><div class="input-wrapper"><input type="text" class="box" style="width:3.2rem;height:1.8rem" data-ans="${i1/d}"><div class="mark-correct"></div></div><div class="w-full border-t-2 border-gray-800 my-1"></div><div class="input-wrapper"><input type="text" class="box" style="width:3.2rem;height:1.8rem" data-ans="${i2/d}"><div class="mark-correct"></div></div></div></div>` 
+                        });
                     } 
-                    // 3. Fraction : Fraction (Target)
+                    // 3. Fraction : Fraction
                     else {
                         let n1, d1, n2, d2;
                         let valid = false;
@@ -842,25 +845,18 @@
                             attempts++;
                             d1 = this.getRandomInt(2, 9);
                             d2 = this.getRandomInt(2, 9);
-                            
-                            // Rule: Different denominators
                             if (d1 === d2) continue;
                             
                             n1 = this.getRandomInt(1, 9);
-                            // Rule: Irreducible and not 1 (n != d)
                             if (n1 === d1 || gcd(n1, d1) !== 1) continue;
                             
                             n2 = this.getRandomInt(1, 9);
                             if (n2 === d2 || gcd(n2, d2) !== 1) continue;
                             
-                            // Rule: Ratio != 1 (fractions not equal)
-                            // n1/d1 == n2/d2  => n1*d2 == n2*d1
                             if (n1 * d2 === n2 * d1) continue;
-                            
                             valid = true;
                         }
                         
-                        // Calculate Ratio Value: (n1/d1) / (n2/d2) = (n1*d2) / (d1*n2)
                         let ansN = n1 * d2;
                         let ansD = d1 * n2;
                         let ansGCD = gcd(ansN, ansD);
@@ -871,7 +867,7 @@
                         const f2 = `<span class="fraction"><span class="numerator">${n2}</span><span class="denominator">${d2}</span></span>`;
                         
                         pool.push({ 
-                            html: `<div class="flex items-center text-xl justify-start w-full text-left ml-4"><span class="math-text text-2xl flex items-center gap-1">${f1} : ${f2}</span><span class="mx-4">→</span><div class="inline-flex flex-col items-center"><div class="input-wrapper"><input type="text" class="box" style="width:3.2rem;height:1.8rem" data-ans="${ansN}"><div class="mark-correct"></div></div><div class="w-full border-t-2 border-gray-800 my-1"></div><div class="input-wrapper"><input type="text" class="box" style="width:3.2rem;height:1.8rem" data-ans="${ansD}"><div class="mark-correct"></div></div></div></div>` 
+                            html: `<div class="flex items-center text-xl justify-start w-full text-left pl-4"><span class="math-text text-2xl flex items-center gap-1">${f1} : ${f2}</span><span class="mx-4">→</span><div class="inline-flex flex-col items-center"><div class="input-wrapper"><input type="text" class="box" style="width:3.2rem;height:1.8rem" data-ans="${ansN}"><div class="mark-correct"></div></div><div class="w-full border-t-2 border-gray-800 my-1"></div><div class="input-wrapper"><input type="text" class="box" style="width:3.2rem;height:1.8rem" data-ans="${ansD}"><div class="mark-correct"></div></div></div></div>` 
                         });
                     }
                 }
@@ -883,58 +879,39 @@
                 const gcd = (x, y) => !y ? x : gcd(y, x % y);
                 const wrapper = (content) => `<div class="flex flex-row items-center w-full text-left ml-4 text-lg whitespace-nowrap overflow-x-hidden">${content}</div>`;
 
-                // 1. Integer : Integer (Standard & Large) - Total 5
+                // 1. Integer : Integer (Standard & Large)
                 for(let i=0; i<5; i++) {
                     let a, b, q1, q2;
-                    // First 3 are standard, last 2 are large
                     if (i < 3) {
-                        a = this.getRandomInt(1, 9);
-                        b = this.getRandomInt(1, 9);
-                        while(gcd(a, b) === 1 || a === b) { // Require simplification
-                             a = this.getRandomInt(2, 9);
-                             b = this.getRandomInt(2, 9);
-                        }
-                        // Simplify a,b to get answer
-                        let d = gcd(a, b);
-                        let ansA = a / d;
-                        let ansB = b / d;
-                        
-                        // Re-logic:
-                        ansA = this.getRandomInt(1, 9);
-                        ansB = this.getRandomInt(1, 9);
-                        while(ansA === ansB || gcd(ansA, ansB) !== 1) {
-                            ansA = this.getRandomInt(1, 9);
-                            ansB = this.getRandomInt(1, 9);
-                        }
-                        let m = this.getRandomInt(2, 9); // Multiplier
-                        q1 = ansA * m;
-                        q2 = ansB * m;
-                        
-                        pool.push({ html: wrapper(`<span class="math-text text-2xl mr-2">${q1} : ${q2}</span> ＝ <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${ansA}"><div class="mark-correct"></div></div> : <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${ansB}"><div class="mark-correct"></div></div>`) });
-
-                    } else {
-                        // Large numbers (e.g. 72:54)
-                        // Use larger multipliers
                         let ansA = this.getRandomInt(1, 9);
                         let ansB = this.getRandomInt(1, 9);
                         while(ansA === ansB || gcd(ansA, ansB) !== 1) {
                             ansA = this.getRandomInt(1, 9);
                             ansB = this.getRandomInt(1, 9);
                         }
-                        // Multiplier 6 to 15, ensuring result < 100
+                        let m = this.getRandomInt(2, 9);
+                        q1 = ansA * m;
+                        q2 = ansB * m;
+                        pool.push({ html: wrapper(`<span class="math-text text-2xl mr-2">${q1} : ${q2}</span> ＝ <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${ansA}"><div class="mark-correct"></div></div> : <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${ansB}"><div class="mark-correct"></div></div>`) });
+                    } else {
+                        let ansA = this.getRandomInt(1, 9);
+                        let ansB = this.getRandomInt(1, 9);
+                        while(ansA === ansB || gcd(ansA, ansB) !== 1) {
+                            ansA = this.getRandomInt(1, 9);
+                            ansB = this.getRandomInt(1, 9);
+                        }
                         let m = this.getRandomInt(6, 12); 
                         q1 = ansA * m;
                         q2 = ansB * m;
-                        // Ensure they look "large" (at least one > 30) and not too easy (like 20:30)
-                        while (q1 < 20 && q2 < 20) {
-                             m = this.getRandomInt(6, 15);
-                             q1 = ansA * m; q2 = ansB * m;
-                        }
-                         pool.push({ html: wrapper(`<span class="math-text text-2xl mr-2">${q1} : ${q2}</span> ＝ <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${ansA}"><div class="mark-correct"></div></div> : <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${ansB}"><div class="mark-correct"></div></div>`) });
+                        while (q1 < 20 && q2 < 20) { 
+                            m = this.getRandomInt(6, 15); 
+                            q1 = ansA * m; q2 = ansB * m;
+                        } 
+                        pool.push({ html: wrapper(`<span class="math-text text-2xl mr-2">${q1} : ${q2}</span> ＝ <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${ansA}"><div class="mark-correct"></div></div> : <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${ansB}"><div class="mark-correct"></div></div>`) });
                     }
                 }
 
-                // 2. Decimal (Unchanged)
+                // 2. Decimal : Decimal
                 for(let i=0; i<5; i++) {
                     let a = this.getRandomInt(1, 9), b = this.getRandomInt(1, 9);
                     if(gcd(a,b) > 1) { let d=gcd(a,b); a/=d; b/=d; }
@@ -946,57 +923,91 @@
                     pool.push({ html: wrapper(`<span class="math-text text-2xl mr-2">${v1} : ${v2}</span> ＝ <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${a}"><div class="mark-correct"></div></div> : <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${b}"><div class="mark-correct"></div></div>`) });
                 }
 
-                // 3. Fraction : Fraction (Constraint: Different denominators)
+                // 3. Fraction : Fraction
                 for(let i=0; i<5; i++) {
                     let a, b, da, db, ra, rb;
                     do {
                         a = this.getRandomInt(1, 5); b = this.getRandomInt(1, 5);
-                        da = this.getRandomInt(2, 9); db = this.getRandomInt(2, 9); // Expanded range slightly
-                        
-                        // Reduce source fractions first to avoid 2/4 vs 1/2 issues effectively being same denominator logic?
-                        // Actually, just checking da !== db is usually enough, but let's be safe.
-                        // The prompt says "Same denominator questions are not allowed".
-                        
-                        // Calculate simplest ratio
-                        let g1 = gcd(a, da); a/=g1; da/=g1;
-                        let g2 = gcd(b, db); b/=g2; db/=g2;
+                        da = this.getRandomInt(2, 9); db = this.getRandomInt(2, 9); 
+                        let d1 = gcd(a, da); a /= d1; da /= d1;
+                        let d2 = gcd(b, db); b /= d2; db /= d2;
                         
                         ra = a * db; rb = b * da;
-                        let d = gcd(ra, rb); ra /= d; rb /= d;
-                    } while (da === 1 || db === 1 || ra === rb || da === db); // Added da === db
+                        let d = gcd(ra, rb);
+                        ra /= d; rb /= d;
+                    } while (da === db || a === da || b === db || ra === rb);
 
                     const f1 = `<span class="fraction"><span class="numerator">${a}</span><span class="denominator">${da}</span></span>`;
                     const f2 = `<span class="fraction"><span class="numerator">${b}</span><span class="denominator">${db}</span></span>`;
-                    pool.push({ html: wrapper(`<span class="math-text text-2xl flex items-center gap-1 mr-2">${f1} : ${f2}</span> ＝ <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${ra}"><div class="mark-correct"></div></div> : <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${rb}"><div class="mark-correct"></div></div>`) });
+                    pool.push({ html: wrapper(`<span class="math-text text-xl mr-2 flex items-center gap-1">${f1} : ${f2}</span> <span class="mx-2">＝</span> <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${ra}"><div class="mark-correct"></div></div> : <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${rb}"><div class="mark-correct"></div></div>`) });
                 }
 
-                // 4. Fraction : Integer (Constraint: Integer != 1)
+                // 4. Integer : Fraction
                 for(let i=0; i<5; i++) {
-                    let a, da, b, ra, rb;
-                    do {
-                        a = this.getRandomInt(1, 5); da = this.getRandomInt(2, 6);
-                        let g1 = gcd(a, da); a/=g1; da/=g1;
-                        b = this.getRandomInt(2, 6); // Changed from (1,5) to (2,6) to prevent 1
-                        
-                        ra = a; rb = b * da;
-                        let d = gcd(ra, rb); ra /= d; rb /= d;
-                    } while (da === 1 || ra === rb);
-
-                    const f1 = `<span class="fraction"><span class="numerator">${a}</span><span class="denominator">${da}</span></span>`;
-                    pool.push({ html: wrapper(`<span class="math-text text-2xl flex items-center gap-1 mr-2">${f1} : ${b}</span> ＝ <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${ra}"><div class="mark-correct"></div></div> : <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${rb}"><div class="mark-correct"></div></div>`) });
+                    let intVal = this.getRandomInt(2, 6);
+                    let a = this.getRandomInt(1, 5);
+                    let da = this.getRandomInt(2, 7);
+                    let d1 = gcd(a, da); a /= d1; da /= d1;
+                    
+                    let ra = intVal * da;
+                    let rb = a;
+                    let d = gcd(ra, rb);
+                    ra /= d; rb /= d;
+                    
+                    const f = `<span class="fraction"><span class="numerator">${a}</span><span class="denominator">${da}</span></span>`;
+                    pool.push({ html: wrapper(`<span class="math-text text-xl mr-2 flex items-center gap-1">${intVal} : ${f}</span> <span class="mx-2">＝</span> <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${ra}"><div class="mark-correct"></div></div> : <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${rb}"><div class="mark-correct"></div></div>`) });
                 }
-                return pool.sort(() => Math.random() - 0.5);
+                
+                return pool.sort(() => Math.random() - 0.5).slice(0, 20);
             }
 
+            // --- 画像の仕様に基づいて比例配分（計算）の問題を再構成 ---
             get6thGradeProportionalDistPool() {
                 let pool = [];
                 const gcd = (x, y) => !y ? x : gcd(y, x % y);
-                for(let i=0; i<35; i++) {
-                    const u = ["g", "cm", "円"][i%3];
-                    let r1 = this.getRandomInt(1, 5), r2 = this.getRandomInt(1, 5); if (r1 === r2) r2++;
-                    let d = gcd(r1, r2); r1 /= d; r2 /= d;
-                    let k = (u === "円") ? this.getRandomInt(5, 20) * 10 : this.getRandomInt(5, 20);
-                    pool.push({ html: `<div class="w-full text-left ml-4 text-xl"><div class="mb-2"><span class="math-text text-2xl">${(r1+r2)*k}${u}</span>を <span class="math-text text-2xl">${r1} : ${r2}</span> に分けると</div><div><div class="input-wrapper"><input type="text" class="box w-20" data-ans="${r1*k}"><div class="mark-correct"></div></div>${u} と <div class="input-wrapper"><input type="text" class="box w-20" data-ans="${r2*k}"><div class="mark-correct"></div></div>${u}</div></div>` });
+                // 画像にあるように円、g、cmなどの単位を採用
+                const units = ["円", "g", "cm", "dL", "m", "枚"];
+                
+                for(let i=0; i<30; i++) {
+                    let r1 = this.getRandomInt(1, 5);
+                    let r2 = this.getRandomInt(1, 5);
+                    if (r1 === r2) r2++;
+                    
+                    // 簡単な比にする
+                    let d = gcd(r1, r2);
+                    r1 /= d;
+                    r2 /= d;
+                    
+                    let sum = r1 + r2;
+                    let k = this.getRandomInt(5, 40);
+                    
+                    // 合計を分かりやすい数値（10の倍数など）に調整するパターンを増やす
+                    let total = sum * k;
+                    if (i % 3 === 0) {
+                        // 合計が切りの良い数になるようkを調整
+                        k = this.getRandomInt(2, 10) * 10;
+                        total = sum * k;
+                    } else if (i % 3 === 1) {
+                        // 少し大きめの整数
+                        k = this.getRandomInt(50, 150);
+                        total = sum * k;
+                    }
+                    
+                    let ans1 = r1 * k;
+                    let ans2 = r2 * k;
+                    let unit = units[i % units.length];
+
+                    pool.push({
+                        html: `<div class="w-full text-left ml-2 text-lg">
+                            <span class="math-text font-extrabold text-2xl">${total}${unit}</span>を 
+                            <span class="math-text font-extrabold text-2xl">${r1} : ${r2}</span> に分けると
+                            <div class="flex items-center justify-start mt-2 pl-4 text-xl">
+                                <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 5.5rem;" data-ans="${ans1}"><div class="mark-correct"></div></div>${unit} と 
+                                <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 5.5rem;" data-ans="${ans2}"><div class="mark-correct"></div></div>${unit}
+                            </div>
+                        </div>`,
+                        answer: "dummy" // HTMLの中に直接 data-ans を埋め込んでいるためdummyでOK
+                    });
                 }
                 return pool.sort(() => Math.random() - 0.5);
             }
@@ -1040,7 +1051,6 @@
                 this.currentProblems = [];
                 const config = this.CONFIG[this.currentGrade][this.currentMode];
                 this.shuffledPool = []; 
-
                 if (config.type === "kakezan_basic") {
                     this.shuffledPool = this.getKakezanPool();
                 } else if (config.type.startsWith("bai_times") || config.type.startsWith("length_volume_bai")) {
@@ -1075,26 +1085,26 @@
                     this.shuffledPool = this.get6thGradeProportionalDistPool();
                 }
 
-                if (!this.shuffledPool || this.shuffledPool.length === 0) {
-                     console.warn("Problem pool is empty. Please ensure all get...Pool methods are implemented.");
-                     return;
+                if (!this.shuffledPool || this.shuffledPool.length === 0) { 
+                    console.warn("Problem pool is empty. Please ensure all get...Pool methods are implemented."); 
+                    return;
                 }
 
                 const poolSize = this.shuffledPool.length;
-                if (poolSize > 0) {
-                     this.shuffledPool.sort(() => Math.random() - 0.5);
-                     const history = new Set();
-                     for(let i=0; i < config.count; i++) {
+                if (poolSize > 0) { 
+                    this.shuffledPool.sort(() => Math.random() - 0.5); 
+                    const history = new Set(); 
+                    for(let i=0; i < config.count; i++) {
                         let q = this.shuffledPool[i % poolSize];
-                        if ((config.type.startsWith('ratio_p') || config.type.includes('mikata') || config.type === 'decimal_div_word') && q.scenarioId) {
-                             if (history.has(q.scenarioId)) {
-                                 const next = this.shuffledPool.find(p => !history.has(p.scenarioId));
-                                 if (next) q = next;
-                             }
-                             history.add(q.scenarioId);
+                        if ((config.type.startsWith('ratio_p') || config.type.includes('mikata') || config.type === 'decimal_div_word') && q.scenarioId) { 
+                            if (history.has(q.scenarioId)) {
+                                const next = this.shuffledPool.find(p => !history.has(p.scenarioId));
+                                if (next) q = next; 
+                            } 
+                            history.add(q.scenarioId);
                         }
-                        this.currentProblems.push(this.formatProblem(config.type, q));
-                     }
+                        this.currentProblems.push(this.formatProblem(config.type, q)); 
+                    }
                 } else {
                     for(let i=0; i < config.count; i++) {
                         this.currentProblems.push(this.formatProblem(config.type, null));
@@ -1104,7 +1114,7 @@
                 this.renderProblems(this.currentProblems, document.getElementById('problems-container'), config.count, config.type);
             }
 
-             formatProblem(type, q) {
+            formatProblem(type, q) {
                 let template = "", a = 0, diagramParams = null;
                 if(!q && !type.startsWith('kakezan') && !type.startsWith('fraction')) return { template: "", answer: 0, diagramParams: null };
 
@@ -1138,11 +1148,12 @@
                     const d = type.endsWith("1") ? this.getRandomInt(2, 5) : this.getRandomInt(6, 9), v = this.getRandomInt(1, 5) * d; a = v / d;
                     template = `<div class="flex items-center text-xl justify-start w-full text-left pl-4"><span class="math-text text-2xl">${v}</span>この <span class="fraction ml-2"><span class="numerator text-xl">${1}</span><span class="denominator text-xl">${d}</span></span>は <div class="input-wrapper ml-2"><input type="text" class="box" data-ans="${a}"><div class="mark-correct"></div></div>こ</div>`; 
                 }
-                return { template, answer: a, diagramParams };
-             }
-             
-             createTapeDiagram(p) {
-                const w = 500, h = 160, pl = 100, bh = 25, sp = 35;
+                return { template, answer: a, diagramParams }; 
+            }
+
+            createTapeDiagram(p) {
+                // viewBox高さを160pxから135pxへスリム化、バーの描画位置やフォントの相対位置を調整して縦の無駄なスペースをカット
+                const w = 500, h = 135, pl = 100, bh = 22, sp = 30;
                 let dB = p.base, dC = p.compare, dR = p.ratio;
                 
                 if (dB === null && dC !== null && dR) dB = dC / dR; 
@@ -1152,25 +1163,25 @@
                 const sMax = Math.max(dB||1, dC||1) * 1.25;
                 const bw = (dB / (sMax||1)) * 350;
                 const cw = (dC / (sMax||1)) * 350;
-                const ay = 110;
+                const ay = 95; // 基準数直線のy座標を110から95へ引き上げ
                 
-                let svg = `<svg width="100%" height="100%" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg">`;
+                let svg = `<svg width="100%" height="100%" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" class="overflow-visible">`;
                 
-                svg += `<text x="${pl-8}" y="28" text-anchor="end" font-size="12" font-weight="900" fill="#4b5563">${p.label1}</text>`;
-                svg += `<rect x="${pl}" y="10" width="${bw}" height="${bh}" fill="#e0e7ff" stroke="#1d4ed8" stroke-width="2" rx="4" />`;
-                svg += `<text x="${pl+bw/2}" y="28" text-anchor="middle" font-size="12" font-weight="bold">${p.base===null ? "□" : p.base}${p.unitLabel||""}</text>`;
+                svg += `<text x="${pl-8}" y="24" text-anchor="end" font-size="12" font-weight="900" fill="#4b5563">${p.label1}</text>`;
+                svg += `<rect x="${pl}" y="8" width="${bw}" height="${bh}" fill="#e0e7ff" stroke="#1d4ed8" stroke-width="2" rx="4" />`;
+                svg += `<text x="${pl+bw/2}" y="24" text-anchor="middle" font-size="12" font-weight="bold">${p.base===null ? "□" : p.base}${p.unitLabel||""}</text>`;
                 
-                svg += `<text x="${pl-8}" y="81" text-anchor="end" font-size="12" font-weight="900" fill="#4b5563">${p.label2}</text>`;
-                svg += `<rect x="${pl}" y="63" width="${cw}" height="${bh}" fill="#fef2f2" stroke="#ef4444" stroke-width="2" rx="4" />`;
-                svg += `<text x="${pl+cw/2}" y="81" text-anchor="middle" font-size="12" font-weight="bold">${p.compare===null ? "□" : p.compare}${p.unitLabel||""}</text>`;
+                svg += `<text x="${pl-8}" y="69" text-anchor="end" font-size="12" font-weight="900" fill="#4b5563">${p.label2}</text>`;
+                svg += `<rect x="${pl}" y="53" width="${cw}" height="${bh}" fill="#fef2f2" stroke="#ef4444" stroke-width="2" rx="4" />`;
+                svg += `<text x="${pl+cw/2}" y="69" text-anchor="middle" font-size="12" font-weight="bold">${p.compare===null ? "□" : p.compare}${p.unitLabel||""}</text>`;
                 
                 svg += `<line x1="${pl}" y1="${ay}" x2="${pl+360}" y2="${ay}" stroke="#1f2937" stroke-width="2" />`;
-                svg += `<text x="${pl}" y="${ay+20}" text-anchor="middle" font-size="12" font-weight="bold">0</text>`;
+                svg += `<text x="${pl}" y="${ay+16}" text-anchor="middle" font-size="12" font-weight="bold">0</text>`;
                 
-                svg += `<line x1="${pl+bw}" y1="${10+bh}" x2="${pl+bw}" y2="${ay+5}" stroke="#94a3b8" stroke-dasharray="4" />`;
-                svg += `<text x="${pl+bw}" y="${ay+20}" text-anchor="middle" font-size="12" font-weight="900">1</text>`;
+                svg += `<line x1="${pl+bw}" y1="${8+bh}" x2="${pl+bw}" y2="${ay+3}" stroke="#94a3b8" stroke-dasharray="4" />`;
+                svg += `<text x="${pl+bw}" y="${ay+16}" text-anchor="middle" font-size="12" font-weight="900">1</text>`;
                 
-                svg += `<line x1="${pl+cw}" y1="${63+bh}" x2="${pl+cw}" y2="${ay+5}" stroke="#94a3b8" stroke-dasharray="4" />`;
+                svg += `<line x1="${pl+cw}" y1="${53+bh}" x2="${pl+cw}" y2="${ay+3}" stroke="#94a3b8" stroke-dasharray="4" />`;
                 
                 let rText = "";
                 if (p.ratio === null) {
@@ -1178,23 +1189,24 @@
                 } else {
                     rText = (p.ratio % 1 === 0 ? p.ratio : p.ratio.toFixed(1));
                 }
-                svg += `<text x="${pl+cw}" y="${ay+22}" text-anchor="middle" font-size="12" font-weight="900" fill="#ef4444">${rText}</text>`;
+                svg += `<text x="${pl+cw}" y="${ay+18}" text-anchor="middle" font-size="12" font-weight="900" fill="#ef4444">${rText}</text>`;
                 
-                return svg + `</svg>`;
-             }
+                return svg + `</svg>`; 
+            }
 
             renderProblems(problems, container, count, type) {
                 container.innerHTML = '';
                 container.className = 'problems-container ' + (count >= 10 ? 'layout-2col' : '');
                 const lrg = ['kakezan_basic', 'ratio_value', 'fraction_part_1', 'fraction_part_2', 'bai_times_1', 'bai_times_2', 'length_volume_bai_1', 'length_volume_bai_2', 'bai_calc_1', 'bai_calc_2', 'find_bai_4patterns', 'find_bai_decimal_4patterns', 'simplify_ratio', 'proportional_dist'];
+                
                 problems.forEach((p, i) => {
                     let body = p.template; 
                     if (count === 5 || count === 10) {
                         let diag = p.diagramParams ? this.createTapeDiagram(p.diagramParams) : "";
-                        if (p.diagramParams) {
-                             container.innerHTML += `<div class="problem-item visual-problem"><div class="flex w-full mb-1"><div class="problem-number">(${i+1})</div><div class="problem-body">${body}</div></div><div class="problem-visual-row"><div class="diagram-area">${diag}<canvas class="drawing-canvas"></canvas><button class="btn-clear" onclick="window.app.clearCanvas(this)">×</button></div><div class="memo-area"><span class="memo-label">計算メモ</span><canvas class="drawing-canvas"></canvas><button class="btn-clear" onclick="window.app.clearCanvas(this)">×</button></div></div></div>`;
-                        } else {
-                             container.innerHTML += `<div class="problem-item visual-problem"><div class="flex w-full mb-1"><div class="problem-number">(${i+1})</div><div class="problem-body">${body}</div></div><div class="problem-visual-row full-memo"><div class="memo-area"><span class="memo-label">計算メモ</span><canvas class="drawing-canvas"></canvas><button class="btn-clear" onclick="window.app.clearCanvas(this)">×</button></div></div></div>`;
+                        if (p.diagramParams) { 
+                            container.innerHTML += `<div class="problem-item visual-problem"><div class="flex w-full mb-1"><div class="problem-number">(${i+1})</div><div class="problem-body">${body}</div></div><div class="problem-visual-row"><div class="diagram-area">${diag}<canvas class="drawing-canvas"></canvas><button class="btn-clear" onclick="window.app.clearCanvas(this)">×</button></div><div class="memo-area"><span class="memo-label">計算メモ</span><canvas class="drawing-canvas"></canvas><button class="btn-clear" onclick="window.app.clearCanvas(this)">×</button></div></div></div>`;
+                        } else { 
+                            container.innerHTML += `<div class="problem-item visual-problem"><div class="flex w-full mb-1"><div class="problem-number">(${i+1})</div><div class="problem-body">${body}</div></div><div class="problem-visual-row full-memo"><div class="memo-area"><span class="memo-label">計算メモ</span><canvas class="drawing-canvas"></canvas><button class="btn-clear" onclick="window.app.clearCanvas(this)">×</button></div></div></div>`;
                         }
                     } else {
                         let eC = (count === 20) ? ' spacious' : '';
@@ -1204,21 +1216,38 @@
                         container.innerHTML += `<div class="problem-item ${eC}"><div class="problem-number">(${i+1})</div><div class="${bC}">${body}</div></div>`;
                     }
                 });
+
                 setTimeout(() => this.initCanvases(), 150);
             }
 
             initCanvases() {
                 document.querySelectorAll('.drawing-canvas').forEach(canvas => {
-                    const parent = canvas.parentElement; canvas.width = parent.clientWidth; canvas.height = parent.clientHeight;
-                    const ctx = canvas.getContext('2d'); ctx.lineWidth = 2; ctx.lineCap = 'round'; ctx.strokeStyle = '#334155';
-                    let drawing = false; const getPos = (e) => { const rect = canvas.getBoundingClientRect(); return { x: (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left, y: (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top }; };
+                    const parent = canvas.parentElement; 
+                    canvas.width = parent.clientWidth; 
+                    canvas.height = parent.clientHeight;
+                    const ctx = canvas.getContext('2d'); 
+                    ctx.lineWidth = 2; 
+                    ctx.lineCap = 'round'; 
+                    ctx.strokeStyle = '#334155';
+                    
+                    let drawing = false; 
+                    const getPos = (e) => { 
+                        const rect = canvas.getBoundingClientRect(); 
+                        return { 
+                            x: (e.clientX || (e.touches && e.touches[0].clientX)) - rect.left, 
+                            y: (e.clientY || (e.touches && e.touches[0].clientY)) - rect.top 
+                        }; 
+                    };
+                    
                     canvas.onmousedown = (e) => { drawing = true; const pos = getPos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); };
                     canvas.onmousemove = (e) => { if(drawing) { const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); } };
-                    canvas.onmouseup = () => drawing = false; canvas.onmouseleave = () => drawing = false;
+                    canvas.onmouseup = () => drawing = false; 
+                    canvas.onmouseleave = () => drawing = false;
                     canvas.ontouchstart = (e) => { drawing = true; const pos = getPos(e); ctx.beginPath(); ctx.moveTo(pos.x, pos.y); e.preventDefault(); };
                     canvas.ontouchmove = (e) => { if(drawing) { const pos = getPos(e); ctx.lineTo(pos.x, pos.y); ctx.stroke(); } e.preventDefault(); };
                 });
             }
+
             clearCanvas(btn) { 
                 const canvas = btn.parentElement.querySelector('canvas'); 
                 if (canvas) { 
@@ -1227,13 +1256,10 @@
                 } 
             }
 
-
-            // --- 答え合わせロジック (Ver.2 改修版) ---
             checkAnswers() {
                 let correctCount = 0;
                 const wrappers = document.querySelectorAll('.input-wrapper');
                 
-                // 既存の正解表示をリセット
                 document.querySelectorAll('.correction-text').forEach(el => el.remove());
 
                 wrappers.forEach(wrapper => {
@@ -1241,14 +1267,13 @@
                     if (!input) return;
                     
                     const v = input.value.trim().replace(/[！-～]/g, s => String.fromCharCode(s.charCodeAt(0) - 0xFEE0));
-                    const ansData = input.dataset.ans; 
+                    const ansData = input.dataset.ans;
                     
                     if (!ansData || v === "") {
                         wrapper.classList.remove('correct', 'incorrect');
                         return;
                     }
 
-                    // 数値として比較（誤差許容）
                     let isCorrect = Math.abs(parseFloat(ansData) - parseFloat(v)) < 0.001;
                     
                     if (isCorrect) { 
@@ -1268,7 +1293,6 @@
 
                 const score = wrappers.length > 0 ? Math.round((correctCount / wrappers.length) * 100) : 0;
                 
-                // スコア表示
                 document.getElementById('score-display').textContent = score;
                 document.getElementById('modal-score').textContent = score + "点";
                 document.getElementById('modal-message').textContent = score === 100 ? "すばらしい！かんぺきです！" : "おしい！あかい数字を見て復習しよう！";
@@ -1280,11 +1304,13 @@
                     this.playFanfare();
                 }
 
-                // ★Ver.2追加: 進捗の保存
                 this.saveProgress(this.currentGrade, this.currentMode, score);
             }
 
-            closeModal() { this.modal.classList.remove('show'); this.stopConfetti(); }
+            closeModal() { 
+                this.modal.classList.remove('show'); 
+                this.stopConfetti(); 
+            }
 
             startConfetti() {
                 this.particles = [];
@@ -1316,17 +1342,22 @@
                 const area = document.getElementById('print-area'); area.innerHTML = '';
                 const create = (ans) => {
                     const sheet = document.getElementById('active-sheet').cloneNode(true);
-                    if(ans) sheet.querySelectorAll('input.box').forEach(i => i.value = i.dataset.ans || '');
-                    // 印刷用シートからはcanvasやボタンを削除
+                    if(ans) {
+                        // 答え合わせ用シートには input に正しい値を埋め込む
+                        sheet.querySelectorAll('input.box').forEach(i => i.value = i.dataset.ans || '');
+                    }
                     sheet.querySelectorAll('.drawing-canvas, .btn-clear, .correction-text').forEach(e => e.remove());
                     area.appendChild(sheet);
                 };
-                create(false); // 問題
-                create(true);  // 解答
+                create(false); 
+                create(true);  
                 window.print();
             }
         }
-        window.app = new MathApp();
+        
+        window.onload = () => {
+            window.app = new MathApp();
+        };
     </script>
 </body>
 </html>
