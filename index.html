@@ -55,13 +55,13 @@
             display: flex; flex-direction: column; overflow: hidden;
         }
         .header-row { display: flex; gap: 1rem; margin-bottom: 1.5rem; align-items: stretch; min-height: 120px; width: 100%; }
-        .header-box { border: 3px solid #374151; border-radius: 10px; padding: 0.8rem 1.2rem; background-color: #fff; flex: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .header-box { border: 3px solid #374151; border-radius: 10px; padding: 0.8rem 1.2rem; background-color: #fff; flex: 1; display: flex; flex-direction: column; justify-content: space-between; min-width: 0; }
         .score-container { border: 3px solid #374151; border-radius: 10px; background-color: #fff; width: 180px; display: flex; flex-direction: column; justify-content: space-between; padding: 0.8rem 1.2rem; flex-shrink: 0; }
         .header-title h1 { white-space: nowrap; font-weight: 900; line-height: 1.3; color: #1f2937; letter-spacing: -0.05em; margin: 0; padding: 0; }
-        .header-inputs { display: flex; flex-direction: row; align-items: center; gap: 0.1rem; width: 100%; margin-top: 0.5rem; flex-wrap: nowrap; }
+        .header-inputs { display: flex; flex-direction: row; align-items: center; gap: 0.1rem; width: 100%; max-width: 100%; margin-top: 0.5rem; flex-wrap: nowrap; box-sizing: border-box; }
         .header-input { border: none; border-bottom: 2px solid #374151; text-align: center; font-weight: 900; font-size: 1.1rem; outline: none; height: 1.8rem; padding: 0; background: transparent; writing-mode: horizontal-tb; }
         .header-input.short { width: 2.2rem; }
-        .header-input.name-input { flex-grow: 1; text-align: left; padding-left: 0.5rem; min-width: 100px; }
+        .header-input.name-input { flex-grow: 1; text-align: left; padding-left: 0.5rem; min-width: 0; width: 100%; }
         .name-label { font-weight: bold; white-space: nowrap; margin-left: 0.2rem; }
         #score-display { font-size: 4.0rem; font-weight: 900; color: #dc2626; line-height: 1; }
 
@@ -142,51 +142,226 @@
         @media print {
             body { background: none; display: block; padding: 0; margin: 0; }
             .screen, .controls, #result-modal, #confetti-canvas { display: none !important; }
+            @page {
+                size: A4 portrait;
+                margin: 0;
+            }
             .sheet { 
-                width: 210mm; 
-                height: 296mm; 
-                page-break-after: always; 
-                padding: 6mm 10mm; /* A4の限界まで収めるためパディングを微調整 */
-                margin: 0; 
-                box-shadow: none; 
-                border: none; 
+                width: 210mm !important; 
+                height: 297mm !important; 
+                max-height: 297mm !important; 
+                padding: 10mm 15mm !important; 
+                margin: 0 !important; 
+                box-shadow: none !important; 
+                border: none !important; 
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: flex-start !important;
+                box-sizing: border-box !important;
+                overflow: hidden !important;
             }
             #print-area { display: block !important; }
             .drawing-canvas, .btn-clear { display: none !important; }
             
-            /* 行間・間隔の徹底引き締め */
-            .layout-2col .problem-item {
-                padding-top: 0.35rem !important;
-                padding-bottom: 0.35rem !important;
+            /* 【修正】タイトル見出し外枠の高さを23mmから25mmへ引き上げ、衝突を完璧に解消 */
+            .header-row { 
+                height: 25mm !important;
+                min-height: 25mm !important;
+                margin-bottom: 5mm !important; 
+                box-sizing: border-box !important;
             }
-            .problem-item.spacious { 
-                padding-top: 0.4rem !important; 
-                padding-bottom: 0.4rem !important; 
-            }
-            .problem-item.visual-problem { 
-                padding-top: 0.15rem !important; 
-                padding-bottom: 0.15rem !important; 
-                margin-bottom: 0.15rem !important; 
-            }
-            .problem-visual-row { 
-                height: 75px !important; /* 全タイプのビジュアル問題を1ページに押し込める設計 */
+            .header-title h1 { line-height: 1.1; font-size: 2.0rem !important; margin-bottom: 2px; } 
+            
+            /* 【修正】ヘッダーボックスの垂直アライメント、パディングの最適化により底辺突き抜けを防止 */
+            .header-box { 
+                display: flex !important; 
+                flex-direction: column !important; 
+                justify-content: center !important; 
+                padding: 0.3rem 0.8rem 5px 0.8rem !important;
+                box-sizing: border-box !important;
+            } 
+            
+            /* フレックス折り返しを制限し、右側にはみ出さない安全マージンを設定 */
+            .header-inputs { 
+                display: flex !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                margin-bottom: 0px !important; 
                 margin-top: 0.15rem !important; 
+                font-size: 0.9rem !important; 
+                max-width: 100% !important; 
+                width: 100% !important; 
+                padding-right: 4.5mm !important; /* 右端のマージンを確保 */
+                box-sizing: border-box !important; 
+                flex-wrap: nowrap !important;
+            } 
+            .header-input { font-size: 1.0rem !important; height: 1.5rem !important; }
+            
+            /* フレックスベースを利用し、既定値による押し出し制限を解除 */
+            .header-input.name-input { 
+                flex: 1 1 0% !important; 
+                min-width: 0 !important; 
+                width: 0 !important; 
+                margin-right: 5mm !important; /* 右枠線にぶつかる前で確実に停止させ、はみ出しを防ぐ */
+                box-sizing: border-box !important;
             }
             
-            /* 印刷用ヘッダー枠を限界まで引き締め */
-            .header-row { 
-                min-height: 85px !important; 
-                margin-bottom: 0.6rem !important; 
-            }
-            .header-title h1 { line-height: 1.1; font-size: 1.9rem !important; margin-bottom: 1px; } 
-            .header-box { display: block !important; height: auto !important; padding: 0.4rem 0.8rem !important; } 
-            .header-inputs { margin-bottom: 3px !important; margin-top: 0.15rem !important; font-size: 0.9rem !important; } 
-            .header-input { font-size: 1.0rem !important; height: 1.5rem !important; }
             .score-container { 
-                width: 120px !important; 
+                width: 130px !important; 
                 padding: 0.4rem 0.8rem !important; 
             }
-            #score-display { font-size: 2.8rem !important; }
+            #score-display { font-size: 3.0rem !important; }
+
+            /* 【良好だった自動等割フレックスに完全復元】共通問題コンテナ印刷高さ 246mm */
+            .problems-container {
+                display: flex !important;
+                flex-direction: column !important;
+                height: 246mm !important;
+                max-height: 246mm !important;
+                box-sizing: border-box !important;
+                justify-content: space-between !important; /* 縦幅全体に自動均等分配 */
+            }
+
+            /* 2列グリッドタイプが flex-direction によって縦1列に崩れるのを防ぐ */
+            .problems-container.layout-2col {
+                display: grid !important;
+                grid-template-columns: 1fr 1fr !important;
+                flex-direction: unset !important;
+                row-gap: 1.2mm !important;
+                column-gap: 8mm !important;
+                align-content: space-between !important;
+            }
+
+            /* グローバルアライメント修正 */
+            .problem-item {
+                align-items: stretch !important;
+            }
+
+            /* 5問ドリル（図・計算メモ付き）のバランス等割配置を復元 */
+            .problems-container.count-5 {
+                justify-content: space-between !important;
+            }
+            .problems-container.count-5 .problem-item {
+                flex: 1 1 auto !important; /* 絶対指定mmを撤廃し、ジャストフィット充填 */
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: space-between !important;
+                padding: 1.5mm 0 !important;
+                border-bottom: 1px dashed #cbd5e1 !important;
+                page-break-inside: avoid !important;
+                box-sizing: border-box !important;
+            }
+            .problems-container.count-5 .problem-visual-row { 
+                height: 24mm !important; /* テープ図と計算メモ枠を印刷時24mmに制限、問題文用の十分な高さを確保 */
+                min-height: 24mm !important;
+                max-height: 24mm !important;
+                margin-top: 1mm !important; 
+                display: flex !important;
+                gap: 2mm !important;
+            }
+            .problems-container.count-5 .diagram-area,
+            .problems-container.count-5 .memo-area {
+                height: 24mm !important;
+            }
+
+            /* 10問ドリル構成 */
+            .problems-container.count-10 {
+                justify-content: space-between !important;
+            }
+            .problems-container.count-10 .problem-item {
+                flex: 1 1 auto !important;
+                display: flex !important;
+                flex-direction: row !important;
+                align-items: center !important;
+                padding: 2mm 0 !important;
+                border-bottom: 1px dashed #e5e7eb !important;
+                page-break-inside: avoid !important;
+                box-sizing: border-box !important;
+            }
+
+            /* 20問ドリル構成 */
+            .problems-container.count-20 .problem-item {
+                display: flex !important;
+                flex-direction: column !important;
+                justify-content: center !important;
+                border-bottom: 1px dashed #e5e7eb !important;
+                page-break-inside: avoid !important;
+                box-sizing: border-box !important;
+                padding: 1mm 0 !important;
+            }
+
+            /* 比例配分のドリルレイアウトのサイズ適合 */
+            .problems-container.count-20 .box {
+                height: 1.6rem !important;
+                width: 4rem !important;
+                font-size: 0.95rem !important;
+            }
+            .problems-container.count-20 div.text-xl {
+                font-size: 0.95rem !important;
+            }
+            .problems-container.count-20 div.text-lg {
+                font-size: 0.85rem !important;
+                margin-top: 1px !important;
+            }
+
+            /* 【修正】問題番号(1)などの直後から同一行で問題文が並ぶインライン構造へ最適化 */
+            .problem-item .problem-number {
+                flex: 0 0 auto !important;
+                display: inline-block !important;
+                font-weight: bold !important;
+                margin-right: 0.4rem !important;
+            }
+            .problem-item .problem-body {
+                display: inline !important;
+                flex-grow: 1 !important;
+            }
+
+            /* テキストサイズを統一し、行数の増加によって解答ボックスが下方に突き抜けるのを防ぐ */
+            .problem-body, 
+            .problem-body div, 
+            .problem-body span, 
+            .problem-body p {
+                font-size: 0.9rem !important;
+                line-height: 1.25 !important;
+            }
+            .problem-item {
+                font-size: 0.9rem !important;
+            }
+
+            /* テンプレート内部のdiv垂直余白を引き銭 */
+            .problems-container .problem-body div {
+                margin-top: 2px !important;
+                margin-bottom: 2px !important;
+            }
+
+            /* --- フォント・入力部品・分数の高さを適正化 --- */
+            .inline-flex.flex-col.items-center input.box {
+                height: 1.25rem !important;
+                width: 2.5rem !important;
+                font-size: 0.85rem !important;
+            }
+            .inline-flex.flex-col.items-center {
+                gap: 1px !important;
+            }
+            .inline-flex.flex-col.items-center .my-1 {
+                margin-top: 1px !important;
+                margin-bottom: 1px !important;
+            }
+            input.box {
+                height: 1.6rem !important;
+                width: 3.2rem !important;
+                font-size: 1.0rem !important;
+            }
+
+            /* テープ図内部SVGの印刷比率の固定 */
+            .diagram-area svg {
+                height: 100% !important;
+                width: auto !important;
+                max-width: 100% !important;
+                display: block !important;
+                margin: 0 auto !important;
+            }
+
             .mark-correct { display: none !important; }
             .correction-text { display: none !important; }
         }
@@ -537,8 +712,8 @@
                     { text: "クッキーが <span class='math-text'>24</span>個あります。これはチョコの <span class='math-text'>3</span>倍です。チョコは何個ですか。", answer: 8, unit: "個", compare: 24, ratio: 3 },
                     { text: "兄の体重は <span class='math-text'>40</span>kg, 弟は <span class='math-text'>20</span>kgです。兄は弟の何倍ですか。", answer: 2, unit: "倍", base: 20, compare: 40, ratio: 2 },
                     { text: "ノートが <span class='math-text'>120</span>円, 鉛筆が <span class='math-text'>60</span>円。ノートは鉛筆の何倍ですか。", answer: 2, unit: "倍", base: 60, compare: 120, ratio: 2 },
-                    { text: "公園に子どもが <span class='math-text'>18</span>人, 大人はその <span class='math-text'>2</span>倍です。大人は何人ですか。", answer: 36, unit: "人", base: 18, ratio: 2 },
-                    { text: "バケツに水が <span class='math-text'>8</span>L入っています。水そうにはその <span class='math-text'>4</span>倍入ります。水そうは何Lですか。", answer: 32, unit: "L", base: 8, ratio: 4 },
+                    { text: "公園に子どもが <span class='math-text'>18</span>人, 大人はその <span class='math-text'>2</span>倍です。大人は何人ですか。", answer: 36, textFull: "公園に子どもが <span class='math-text'>18</span>人、大人はその <span class='math-text'>2</span>倍います。大人は何人ですか。", unit: "人", base: 18, ratio: 2 },
+                    { text: "バケツに水が <span class='math-text'>8</span>L入っています。水そうにはその <span class='math-text'>4</span>倍入ります。水そう何Lですか。", answer: 32, unit: "L", base: 8, ratio: 4 },
                     { text: "赤いリボンが <span class='math-text'>45</span>cmあります。これは白いリボンの <span class='math-text'>5</span>倍です。白は何cmですか。", answer: 9, unit: "cm", compare: 45, ratio: 5 }
                 ].sort(() => Math.random() - 0.5);
             }
@@ -777,13 +952,13 @@
                         let b = [10, 20, 30, 40, 50][this.getRandomInt(0, 4)]; 
                         return {b, r, c:Math.round(b*r)}; 
                     }, lessThanOne: true },
-                    { id: 'e', t1: (b,c)=>`定員 <span class="math-text">${b}</span>人のイベントに <span class="math-text">${c}</span>人の申し込みがありました。定員をもとにした申し込み人数の割合を求めましょう。`, t2: (b,r)=>`定員 <span class="math-text">${b}</span>人のイベントに、定員の <span class="math-text">${r}</span>倍の申し込みがありました。何人申し込みましたか。`, t3: (c,r)=>`イベントに <span class="math-text">${c}</span>人の申し込みがありました。これは定員の <span class="math-text">${r}</span>倍です。定員は何人ですか。`, ul: "人", bl: "定員", cl: "申し込み", gen: (r) => { let b = [50, 100, 200, 400][this.getRandomInt(0, 3)]; return {b, r, c:Math.round(b*r)}; } },
+                    { id: 'e', t1: (b,c)=>`定員 <span class="math-text">${b}</span>人のイベントに <span class="math-text">${c}</span>人の申し込みがありました。定員をもとにした申し込み人数の割合を求めましょう。`, t2: (b,r)=>`定員 <span class="math-text">${b}</span>人のイベントに、定員の <span class="math-text">${r}</span>倍 of 申し込みがありました。何人申し込みましたか。`, t3: (c,r)=>`イベントに <span class="math-text">${c}</span>人の申し込みがありました。これは定員の <span class="math-text">${r}</span>倍です。定員は何人ですか。`, ul: "人", bl: "定員", cl: "申し込み", gen: (r) => { let b = [50, 100, 200, 400][this.getRandomInt(0, 3)]; return {b, r, c:Math.round(b*r)}; } },
                     { id: 'h', t1: (b,c)=>`弟の身長は <span class="math-text">${b}</span>cm, 兄の身長は <span class="math-text">${c}</span>cmです。弟の身長をもとにした兄の身長の割合を求めましょう。`, t2: (b,r)=>`弟の身長は <span class="math-text">${b}</span>cmです。兄の身長は弟の <span class="math-text">${r}</span>倍です。兄は何cmですか。`, t3: (c,r)=>`兄の身長は <span class="math-text">${c}</span>cmです。これは弟の身長の <span class="math-text">${r}</span>倍です。弟は何cmですか。`, ul: "cm", bl: "弟", cl: "兄", gen: (r) => { 
                         let safeR = (r <= 1.0) ? 1.2 : r;
                         let b = [130, 140, 150, 160][this.getRandomInt(0, 3)]; 
                         return {b, r:safeR, c:Math.round(b*safeR)}; 
                     } },
-                    { id: 'p', t1: (b,c)=>`A市の人口は <span class="math-text">${b}</span>人, B市の人口は <span class="math-text">${c}</span>人です。A市の人口をもとにしたB市の人口の割合を求めましょう。`, t2: (b,r)=>`A市の人口は <span class="math-text">${b}</span>人です。B市の人口はA市の <span class="math-text">${r}</span>倍です。B市は何人ですか。`, t3: (c,r)=>`B市の人口は <span class="math-text">${c}</span>人です。これはA市の人口の <span class="math-text">${r}</span>倍です。A市は何人ですか。`, ul: "人", bl: "A市", cl: "B市", gen: (r) => { let b = [20000, 40000, 50000][this.getRandomInt(0, 2)]; return {b, r, c:Math.round(b*r)}; } },
+                    { id: 'p', t1: (b,c)=>`A市の人口は <span class="math-text">${b}</span>人, B市の人口は <span class="math-text">${c}</span>人です。A市の人口をもとにしたB市の人口の割合を求めましょう。`, t2: (b,r)=>`A市の人口は <span class="math-text">${b}</span>人です。B市の人口はA市の <span class="math-text">${r}</span>倍です。B市は何人ですか。`, t3: (c,r)=>`B市の人口 is <span class="math-text">${c}</span>人です。これはA市の人口の <span class="math-text">${r}</span>倍です。A市は何人ですか。`, ul: "人", bl: "A市", cl: "B市", gen: (r) => { let b = [20000, 40000, 50000][this.getRandomInt(0, 2)]; return {b, r, c:Math.round(b*r)}; } },
                     { id: 'w', t1: (b,c)=>`水そうに <span class="math-text">${b}</span>Lの水が入ります。今は <span class="math-text">${c}</span>L入っています。全体の量に対する割合を求めましょう。`, t2: (b,r)=>`水そうに <span class="math-text">${b}</span>Lの水が入ります。今は全体の <span class="math-text">${r}</span>倍入っています。何Lですか。`, t3: (c,r)=>`水そうに <span class="math-text">${c}</span>Lの水が入っています。これは全体の <span class="math-text">${r}</span>倍です。全体は何L入りますか。`, ul: "L", bl: "全体", cl: "今", gen: (r) => { let b = [20, 40, 50, 100][this.getRandomInt(0, 3)]; return {b, r, c:Math.round(b*r)}; }, lessThanOne: true }
                 ];
 
@@ -939,7 +1114,7 @@
 
                     const f1 = `<span class="fraction"><span class="numerator">${a}</span><span class="denominator">${da}</span></span>`;
                     const f2 = `<span class="fraction"><span class="numerator">${b}</span><span class="denominator">${db}</span></span>`;
-                    pool.push({ html: wrapper(`<span class="math-text text-xl mr-2 flex items-center gap-1">${f1} : ${f2}</span> <span class="mx-2">＝</span> <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${ra}"><div class="mark-correct"></div></div> : <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${rb}"><div class="mark-correct"></div></div>`) });
+                    pool.push({ html: wrapper(`<span class="fraction"><span class="numerator">${a}</span><span class="denominator">${da}</span></span> : <span class="fraction"><span class="numerator">${b}</span><span class="denominator">${db}</span></span> ＝ <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${ra}"><div class="mark-correct"></div></div> : <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 2.8rem;" autocomplete="off" data-ans="${rb}"><div class="mark-correct"></div></div>`) });
                 }
 
                 // 4. Integer : Fraction
@@ -961,11 +1136,9 @@
                 return pool.sort(() => Math.random() - 0.5).slice(0, 20);
             }
 
-            // --- 画像の仕様に基づいて比例配分（計算）の問題を再構成 ---
             get6thGradeProportionalDistPool() {
                 let pool = [];
                 const gcd = (x, y) => !y ? x : gcd(y, x % y);
-                // 画像にあるように円、g、cmなどの単位を採用
                 const units = ["円", "g", "cm", "dL", "m", "枚"];
                 
                 for(let i=0; i<30; i++) {
@@ -973,7 +1146,6 @@
                     let r2 = this.getRandomInt(1, 5);
                     if (r1 === r2) r2++;
                     
-                    // 簡単な比にする
                     let d = gcd(r1, r2);
                     r1 /= d;
                     r2 /= d;
@@ -981,14 +1153,11 @@
                     let sum = r1 + r2;
                     let k = this.getRandomInt(5, 40);
                     
-                    // 合計を分かりやすい数値（10の倍数など）に調整するパターンを増やす
                     let total = sum * k;
                     if (i % 3 === 0) {
-                        // 合計が切りの良い数になるようkを調整
                         k = this.getRandomInt(2, 10) * 10;
                         total = sum * k;
                     } else if (i % 3 === 1) {
-                        // 少し大きめの整数
                         k = this.getRandomInt(50, 150);
                         total = sum * k;
                     }
@@ -998,15 +1167,16 @@
                     let unit = units[i % units.length];
 
                     pool.push({
-                        html: `<div class="w-full text-left ml-2 text-lg">
-                            <span class="math-text font-extrabold text-2xl">${total}${unit}</span>を 
-                            <span class="math-text font-extrabold text-2xl">${r1} : ${r2}</span> に分けると
-                            <div class="flex items-center justify-start mt-2 pl-4 text-xl">
-                                <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 5.5rem;" data-ans="${ans1}"><div class="mark-correct"></div></div>${unit} と 
-                                <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 5.5rem;" data-ans="${ans2}"><div class="mark-correct"></div></div>${unit}
+                        html: `<div class="w-full text-left pl-2">
+                            <div class="font-extrabold text-xl mb-1">
+                                <span class="math-text">${total}</span>${unit}を <span class="math-text">${r1} : ${r2}</span> に分けると
+                            </div>
+                            <div class="flex items-center justify-start text-lg pl-4">
+                                <div class="input-wrapper mr-1"><input type="text" class="box" style="width: 5rem; height: 2.2rem;" data-ans="${ans1}"><div class="mark-correct"></div></div>${unit} と 
+                                <div class="input-wrapper mx-1"><input type="text" class="box" style="width: 5rem; height: 2.2rem;" data-ans="${ans2}"><div class="mark-correct"></div></div>${unit}
                             </div>
                         </div>`,
-                        answer: "dummy" // HTMLの中に直接 data-ans を埋め込んでいるためdummyでOK
+                        answer: "dummy"
                     });
                 }
                 return pool.sort(() => Math.random() - 0.5);
@@ -1032,7 +1202,7 @@
                     const pt = i % 4;
                     if (pt === 0) {
                         const sc = 25000, mCm = this.getRandomInt(2, 8);
-                        pool.push({ html: `<div class="w-full text-left ml-4 text-lg">縮尺 1 : ${sc} の地図で <span class="math-text text-xl">${mCm}</span>cm の距離は、実際には何kmですか。</div><div class="flex items-center justify-end text-lg">答え <div class="input-wrapper"><input type="text" class="box w-24" data-ans="${(mCm*sc)/100000}"><div class="mark-correct"></div></div>km</div></div>` });
+                        pool.push({ html: `<div class="w-full text-left ml-4 text-lg">縮尺 1 : ${sc} の地図で <span class="math-text text-xl">${mCm}</span>cm の距離は、実際には何kmですか。</div><div class="flex items-center justify-end text-lg">答え <div class="input-wrapper"><input type="text" class="box w-2.2rem" style="height: 1.8rem;" data-ans="${(mCm*sc)/100000}"><div class="mark-correct"></div></div>km</div></div>` });
                     } else if (pt === 1) {
                         const shadow = [{ s: 80, t: 6, a: 7.5 }, { s: 50, t: 4, a: 8 }][this.getRandomInt(0, 1)];
                         pool.push({ html: `<div class="w-full text-left ml-4 text-lg">長さ <span class="math-text text-xl">1</span>m の棒の影が <span class="math-text text-xl">${shadow.s}</span>cm の時、木の影が <span class="math-text text-xl">${shadow.t}</span>m でした。木の高さは何mですか。</div><div class="flex items-center justify-end text-lg">答え <div class="input-wrapper"><input type="text" class="box w-24" data-ans="${shadow.a}"><div class="mark-correct"></div></div>m</div></div>` });
@@ -1152,8 +1322,8 @@
             }
 
             createTapeDiagram(p) {
-                // viewBox高さを160pxから135pxへスリム化、バーの描画位置やフォントの相対位置を調整して縦の無駄なスペースをカット
-                const w = 500, h = 135, pl = 100, bh = 22, sp = 30;
+                // viewBox高さを135pxからさらにコンパクトな110pxへ。縦の占有スペースを最小限にして改ページを防止
+                const w = 500, h = 110, pl = 100, bh = 20;
                 let dB = p.base, dC = p.compare, dR = p.ratio;
                 
                 if (dB === null && dC !== null && dR) dB = dC / dR; 
@@ -1163,25 +1333,25 @@
                 const sMax = Math.max(dB||1, dC||1) * 1.25;
                 const bw = (dB / (sMax||1)) * 350;
                 const cw = (dC / (sMax||1)) * 350;
-                const ay = 95; // 基準数直線のy座標を110から95へ引き上げ
+                const ay = 80; // 基準数直線のy座標を引き下げて空間を圧縮
                 
                 let svg = `<svg width="100%" height="100%" viewBox="0 0 ${w} ${h}" xmlns="http://www.w3.org/2000/svg" class="overflow-visible">`;
                 
-                svg += `<text x="${pl-8}" y="24" text-anchor="end" font-size="12" font-weight="900" fill="#4b5563">${p.label1}</text>`;
-                svg += `<rect x="${pl}" y="8" width="${bw}" height="${bh}" fill="#e0e7ff" stroke="#1d4ed8" stroke-width="2" rx="4" />`;
-                svg += `<text x="${pl+bw/2}" y="24" text-anchor="middle" font-size="12" font-weight="bold">${p.base===null ? "□" : p.base}${p.unitLabel||""}</text>`;
+                svg += `<text x="${pl-8}" y="22" text-anchor="end" font-size="11" font-weight="900" fill="#4b5563">${p.label1}</text>`;
+                svg += `<rect x="${pl}" y="6" width="${bw}" height="${bh}" fill="#e0e7ff" stroke="#1d4ed8" stroke-width="2" rx="4" />`;
+                svg += `<text x="${pl+bw/2}" y="21" text-anchor="middle" font-size="11" font-weight="bold">${p.base===null ? "□" : p.base}${p.unitLabel||""}</text>`;
                 
-                svg += `<text x="${pl-8}" y="69" text-anchor="end" font-size="12" font-weight="900" fill="#4b5563">${p.label2}</text>`;
-                svg += `<rect x="${pl}" y="53" width="${cw}" height="${bh}" fill="#fef2f2" stroke="#ef4444" stroke-width="2" rx="4" />`;
-                svg += `<text x="${pl+cw/2}" y="69" text-anchor="middle" font-size="12" font-weight="bold">${p.compare===null ? "□" : p.compare}${p.unitLabel||""}</text>`;
+                svg += `<text x="${pl-8}" y="57" text-anchor="end" font-size="11" font-weight="900" fill="#4b5563">${p.label2}</text>`;
+                svg += `<rect x="${pl}" y="42" width="${cw}" height="${bh}" fill="#fef2f2" stroke="#ef4444" stroke-width="2" rx="4" />`;
+                svg += `<text x="${pl+cw/2}" y="57" text-anchor="middle" font-size="11" font-weight="bold">${p.compare===null ? "□" : p.compare}${p.unitLabel||""}</text>`;
                 
                 svg += `<line x1="${pl}" y1="${ay}" x2="${pl+360}" y2="${ay}" stroke="#1f2937" stroke-width="2" />`;
-                svg += `<text x="${pl}" y="${ay+16}" text-anchor="middle" font-size="12" font-weight="bold">0</text>`;
+                svg += `<text x="${pl}" y="${ay+14}" text-anchor="middle" font-size="11" font-weight="bold">0</text>`;
                 
-                svg += `<line x1="${pl+bw}" y1="${8+bh}" x2="${pl+bw}" y2="${ay+3}" stroke="#94a3b8" stroke-dasharray="4" />`;
-                svg += `<text x="${pl+bw}" y="${ay+16}" text-anchor="middle" font-size="12" font-weight="900">1</text>`;
+                svg += `<line x1="${pl+bw}" y1="${6+bh}" x2="${pl+bw}" y2="${ay+3}" stroke="#94a3b8" stroke-dasharray="4" />`;
+                svg += `<text x="${pl+bw}" y="${ay+14}" text-anchor="middle" font-size="11" font-weight="900">1</text>`;
                 
-                svg += `<line x1="${pl+cw}" y1="${53+bh}" x2="${pl+cw}" y2="${ay+3}" stroke="#94a3b8" stroke-dasharray="4" />`;
+                svg += `<line x1="${pl+cw}" y1="${42+bh}" x2="${pl+cw}" y2="${ay+3}" stroke="#94a3b8" stroke-dasharray="4" />`;
                 
                 let rText = "";
                 if (p.ratio === null) {
@@ -1189,14 +1359,15 @@
                 } else {
                     rText = (p.ratio % 1 === 0 ? p.ratio : p.ratio.toFixed(1));
                 }
-                svg += `<text x="${pl+cw}" y="${ay+18}" text-anchor="middle" font-size="12" font-weight="900" fill="#ef4444">${rText}</text>`;
+                svg += `<text x="${pl+cw}" y="${ay+16}" text-anchor="middle" font-size="11" font-weight="900" fill="#ef4444">${rText}</text>`;
                 
                 return svg + `</svg>`; 
             }
 
             renderProblems(problems, container, count, type) {
                 container.innerHTML = '';
-                container.className = 'problems-container ' + (count >= 10 ? 'layout-2col' : '');
+                // 印刷スタイル適用のため問題数ごとの count クラスを付与
+                container.className = `problems-container count-${count} ` + (count >= 10 ? 'layout-2col' : '');
                 const lrg = ['kakezan_basic', 'ratio_value', 'fraction_part_1', 'fraction_part_2', 'bai_times_1', 'bai_times_2', 'length_volume_bai_1', 'length_volume_bai_2', 'bai_calc_1', 'bai_calc_2', 'find_bai_4patterns', 'find_bai_decimal_4patterns', 'simplify_ratio', 'proportional_dist'];
                 
                 problems.forEach((p, i) => {
